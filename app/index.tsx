@@ -190,10 +190,16 @@ export default function HomeScreen() {
       setImagesLoaded(true);
     };
     preloadImages();
-    setTimeout(() => {
-      SplashScreen.hideAsync();
-    }, 3000);
   }, []);
+
+  // Both fonts AND images must be ready
+  const [appReady, setAppReady] = useState(false);
+
+  useEffect(() => {
+    if (fontsLoaded && imagesLoaded && appReady) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, imagesLoaded, appReady]);
 
   const [shuffled, setShuffled] = useState<Card[]>([]);
 
@@ -244,6 +250,19 @@ export default function HomeScreen() {
     }
   }, [shuffled, placed]);
 
+  // for testing
+  // useEffect(() => {
+  //   if (!placed && deck.length > 0) {
+  //     setFirstFour(deck.slice(0, 4));
+  //     setSecondFour(deck.slice(4, 8));
+  //     setThirdFour(deck.slice(8, 12));
+  //     setFourthFour(deck.slice(12, 16));
+  //     setRemaining(deck.slice(19));
+
+  //     setPlaced(true);
+  //   }
+  // }, [shuffled, placed]);
+
   // Draw
   const handleDraw = () => {
     setFirst(null);
@@ -254,7 +273,7 @@ export default function HomeScreen() {
       setFaceUps([]);
     } else {
       const copyRemaining = [...remaining];
-      const drawn = copyRemaining.pop();
+      const drawn = copyRemaining.shift();
 
       if (drawn) {
         setFaceUps([...faceUps, drawn]);
@@ -402,6 +421,7 @@ export default function HomeScreen() {
       source={require("../assets/background/fabric2.webp")}
       style={styles.whole}
       resizeMode="cover"
+      onLayout={() => setAppReady(true)}
     >
       <Header setOpenInfo={setOpenInfo} />
       <View style={styles.fourContainer}>

@@ -225,7 +225,7 @@ const PlayArea = ({
         >
           {faceUps.map((x, i) => (
             <Pressable
-              key={i}
+              key={`${x.id}-${first?.id ?? "none"}-${faceUps.length}`}
               style={{
                 ...styles.imageBox,
                 width: vw * 0.15,

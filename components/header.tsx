@@ -153,32 +153,39 @@ const Header = ({ setOpenInfo }: Prop) => {
               justifyContent: "center",
               width: "100%",
               height: "100%",
+              gap: 10,
             }}
           >
             <Text
               style={{
                 fontSize: vw * 0.06,
                 height: "100%",
-                color: "rgba(255, 217, 0, 1)",
+                color: "rgb(255, 217, 0)",
+                fontFamily: "Gugi-Regular",
+                textAlign: "center",
+                textAlignVertical: "center",
+                flexShrink: 0,
+                includeFontPadding: false,
+                minWidth: vw * 0.12,
+              }}
+              allowFontScaling={false}
+              numberOfLines={1}
+            >
+              {days[dayNum][lang]}
+            </Text>
+            <Text
+              style={{
+                fontSize: vw * 0.06,
+                height: "100%",
+                color: "rgb(255, 217, 0)",
                 fontFamily: "Gugi-Regular",
                 textAlign: "center",
                 textAlignVertical: "center",
               }}
               allowFontScaling={false}
             >
-              {days[dayNum][lang]} {date}
-            </Text>
-            {/* <Text
-              style={{
-                fontSize: vw * 0.05,
-                color: "rgba(255, 255, 255, 1)",
-                fontFamily: "Gugi-Regular",
-                textAlign: "center",
-              }}
-              allowFontScaling={false}
-            >
               {date}
-            </Text> */}
+            </Text>
           </View>
         </View>
       </View>

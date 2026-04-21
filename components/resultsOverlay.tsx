@@ -1,0 +1,471 @@
+import { useLanguage } from "@/context/LanguageContext";
+import { useFonts } from "expo-font";
+import * as Haptics from "expo-haptics";
+import React, { useEffect, useState } from "react";
+import {
+  Animated,
+  Dimensions,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+
+interface Card {
+  month: string; // e.g., "Jan", "Feb", etc.
+  rank: string;
+  id: string; // optional, unique identifier
+  img: string;
+  rotation: number;
+  title: { en: string; ko: string };
+  meaning: { en: string; ko: string };
+}
+
+type Props = {
+  setOpenResults: (value: boolean) => void;
+  boxOne: Card[];
+  boxTwo: Card[];
+  boxThree: Card[];
+  boxFour: Card[];
+  imageSet: Record<string, any>;
+  setResults: (value: Card[][]) => void;
+};
+
+const close = { en: "Close", ko: "닫기" };
+
+const result = { en: "Reading", ko: "운세" };
+
+const months: String[] = [
+  "jan",
+  "feb",
+  "mar",
+  "apr",
+  "may",
+  "jun",
+  "jul",
+  "aug",
+  "sep",
+  "oct",
+  "nov",
+  "dec",
+];
+
+const ranks = ["A", "B", "C", "D"];
+
+const ResultsOverlay = ({
+  setOpenResults,
+  boxOne,
+  boxTwo,
+  boxThree,
+  boxFour,
+  imageSet,
+  setResults,
+}: Props) => {
+  const { width: vw, height: vh } = Dimensions.get("window");
+
+  const { lang } = useLanguage();
+
+  const [fontsLoaded] = useFonts({
+    // Point directly to your local asset
+    "GowunDodum-Regular": require("../assets/fonts/GowunDodum-Regular.ttf"),
+    "Gugi-Regular": require("../assets/fonts/Gugi-Regular.ttf"),
+  });
+
+  const [translateClose, setTranslateClose] = useState(0);
+  const [opacity] = useState(new Animated.Value(0));
+
+  useEffect(() => {
+    Animated.timing(opacity, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
+  const handleClose = () => {
+    Animated.timing(opacity, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => setOpenResults(false));
+  };
+
+  const [boxes] = useState([boxOne, boxTwo, boxThree, boxFour]);
+
+  const [matches, setMatches] = useState<Card[][]>([]);
+
+  useEffect(() => {
+    if (boxFour.length === 12) {
+      const matched: Card[] = [];
+
+      boxes.map((x, i) => {
+        boxes[i].map((card) => {
+          const monthCounts = boxes[i].reduce(
+            (acc, card) => {
+              acc[card.month] = (acc[card.month] || 0) + 1;
+              return acc;
+            },
+            {} as Record<string, number>,
+          );
+
+          if (monthCounts[card.month] === 4) {
+            matched.push(card);
+          }
+        });
+      });
+
+      const orderedRanks = matched.sort(
+        (a, b) => ranks.indexOf(a.rank) - ranks.indexOf(b.rank),
+      );
+
+      const orderedMonths = orderedRanks.sort(
+        (a, b) => months.indexOf(a.month) - months.indexOf(b.month),
+      );
+
+      const result: Card[][] = [];
+
+      let currentGroup = [orderedMonths[0]];
+
+      for (let i = 1; i < orderedMonths.length; i++) {
+        if (orderedMonths[i].month === orderedMonths[i - 1].month) {
+          currentGroup.push(orderedMonths[i]);
+        } else {
+          result.push(currentGroup);
+          currentGroup = [orderedMonths[i]];
+        }
+      }
+      result.push(currentGroup);
+
+      setMatches(result);
+      setResults(result);
+    }
+  }, [boxFour]);
+
+  return (
+    <Animated.View
+      style={{
+        position: "absolute",
+        width: "100%",
+        height: "100%",
+        zIndex: 20,
+        backgroundColor: "rgba(255, 255, 255, 0.3)",
+        opacity,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <View
+        style={{
+          backgroundColor: "rgba(235, 235, 235, 0.8)",
+          borderRadius: 15,
+          overflow: "hidden",
+          padding: 10,
+          width: "90%",
+          height: "70%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 10,
+          boxShadow: "inset 1px 2px 3px 3px white, 1px 3px 3px 2px black",
+        }}
+      >
+        <View
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            borderRadius: 10,
+            overflow: "hidden",
+            width: "100%",
+            height: vh * 0.05,
+            backgroundColor: "rgb(42, 83, 60)",
+          }}
+        >
+          <Text
+            style={{
+              fontSize: vw * 0.06,
+              fontFamily: "Gugi-Regular",
+              color: "rgba(255, 217, 0, 1)",
+              width: "100%",
+              textAlign: "center",
+            }}
+            allowFontScaling={false}
+          >
+            {new Date().toLocaleDateString()} {result[lang]}
+          </Text>
+        </View>
+        <View
+          style={{
+            width: "100%",
+            height: "80%",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-evenly",
+            alignContent: "center",
+            gap: 0,
+          }}
+        >
+          {/* <View
+            style={{
+              height: "45%",
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            {boxes.map((x, i) => (
+              <View
+                key={i}
+                style={{
+                  width: "100%",
+                  height: "22%",
+                  flexDirection: "row",
+                  flexWrap: "nowrap",
+                  justifyContent: "space-around",
+                  alignItems: "center",
+                  gap: 1,
+                  backgroundColor: "rgba(235, 235, 235, 0.8)",
+                  boxShadow: "inset 1px 1px 4px black",
+                  padding: 5,
+                  borderRadius: 10,
+                }}
+              >
+                {boxes[i].map((card, index) => {
+                  const monthCounts = boxes[i].reduce((acc, card) => {
+                    acc[card.month] = (acc[card.month] || 0) + 1;
+                    return acc;
+                  }, {} as Record<string, number>);
+
+                  const hasFour = monthCounts[card.month] === 4;
+
+                  return (
+                    <View
+                      key={index}
+                      style={{
+                        width: "6%",
+                        aspectRatio: 230 / 360,
+                        borderRadius: 1,
+                        // transform: [{ rotate: `${card.rotation}deg` }],
+                        borderColor: "indianred",
+                        borderWidth: 1,
+                        boxShadow: hasFour
+                          ? "0px 0px 0px 3px rgba(56, 129, 50, 1)"
+                          : "1px 1px 1px black",
+                      }}
+                    >
+                      <Image
+                        key={card.id}
+                        source={imageSet[card.img]}
+                        style={{ width: "100%", height: "100%" }}
+                        resizeMode="stretch"
+                      />
+                    </View>
+                  );
+                })}
+              </View>
+            ))}
+          </View> */}
+          <View
+            style={{
+              height: "100%",
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <ScrollView
+              style={{
+                width: "100%",
+                height: "100%",
+                borderRadius: 10,
+                overflow: "hidden",
+                borderColor: "black",
+                padding: 10,
+                boxShadow: "inset 1px 1px 4px black",
+                backgroundColor: "rgba(235, 235, 235, 0.8)",
+              }}
+              contentContainerStyle={{
+                display: "flex",
+                flexDirection: "column",
+                flexWrap: "nowrap",
+                gap: 5,
+                paddingBottom: 10,
+              }}
+            >
+              {matches.map((x, i) => (
+                <View
+                  key={i}
+                  style={{
+                    height: 80,
+                    display: "flex",
+                    flexDirection: "row",
+                    flexWrap: "wrap",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+
+                    // borderWidth: 1,
+                    // borderColor: "blue",
+                  }}
+                >
+                  <View style={{ width: "40%" }}>
+                    {matches[i].map((card, index) => (
+                      <View
+                        key={index}
+                        style={{
+                          width: 40,
+                          height: "auto",
+                          aspectRatio: "230/360",
+                          borderWidth: 1,
+                          borderRadius: 3,
+                          overflow: "hidden",
+                          borderColor: "indianred",
+                          position: "absolute",
+                          transform: [
+                            { translateX: index * 25 },
+                            { rotate: `${card.rotation}deg` },
+                          ],
+                          zIndex: 4 - index,
+                          boxShadow: "3px 3px 4px black",
+                        }}
+                      >
+                        <Image
+                          key={card.id}
+                          source={imageSet[card.img]}
+                          style={{ width: "100%", height: "100%" }}
+                          resizeMode="stretch"
+                        />
+                      </View>
+                    ))}
+                  </View>
+                  <View
+                    style={{
+                      width: "60%",
+                      height: 80,
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "flex-start",
+                      justifyContent: "flex-start",
+                      gap: 0,
+                    }}
+                  >
+                    <View
+                      style={{
+                        width: "100%",
+                        display: "flex",
+                        flexDirection: lang === "en" ? "row" : "row-reverse",
+                        justifyContent: "space-between",
+                        alignItems: "flex-end",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: vw * 0.04,
+                          fontWeight: "bold",
+                          fontFamily: "GowunDodum-Regular",
+                          textAlign: "right",
+                        }}
+                        allowFontScaling={true}
+                      >
+                        {matches[i][1].title.en}
+                      </Text>
+                      <Text
+                        style={{
+                          fontSize: vw * 0.04,
+                          fontWeight: "bold",
+                          fontFamily: "GowunDodum-Regular",
+                        }}
+                        allowFontScaling={true}
+                      >
+                        {matches[i][1].title.ko}
+                      </Text>
+                    </View>
+                    <View
+                      style={{
+                        width: "100%",
+                        height: 1,
+                        backgroundColor: "black",
+                      }}
+                    ></View>
+                    <Text
+                      style={{
+                        fontSize: vw * 0.035,
+                        paddingTop: 4,
+                        fontFamily: "GowunDodum-Regular",
+                      }}
+                      allowFontScaling={true}
+                    >
+                      {matches[i][1].meaning[lang]}
+                    </Text>
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+        <View
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            height: vh * 0.05,
+          }}
+        >
+          <Pressable
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              width: "100%",
+            }}
+            onPress={() => handleClose()}
+            onPressIn={() => {
+              Haptics.selectionAsync();
+              setTranslateClose(2);
+            }}
+            onPressOut={() => setTranslateClose(0)}
+          >
+            <Animated.View
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "rgb(219, 0, 0)",
+                paddingVertical: 0,
+                height: "100%",
+                width: "100%",
+                borderRadius: 10,
+                overflow: "hidden",
+                boxShadow: "inset 2px 2px 2px white, 2px 2px 2px 1px black",
+                transform: [{ translateY: translateClose }],
+              }}
+            >
+              <Text
+                style={{
+                  color: "white",
+                  fontWeight: "500",
+                  fontSize: vw * 0.05,
+                }}
+                allowFontScaling={false}
+              >
+                {close[lang]}
+              </Text>
+            </Animated.View>
+          </Pressable>
+        </View>
+      </View>
+    </Animated.View>
+  );
+};
+
+export default ResultsOverlay;
+
+const styles = StyleSheet.create({});

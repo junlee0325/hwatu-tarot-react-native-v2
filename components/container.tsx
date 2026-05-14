@@ -120,10 +120,10 @@ const Container = ({
             borderStyle: "solid",
             borderRadius: 5,
             overflow: "hidden",
-            boxShadow:
-              boxTarget === index
-                ? "0px 0px 0px 2px rgba(255, 217, 0, 1), inset 1px 1px 1px black"
-                : "inset 1px 1px 1px 1px black",
+            borderColor: boxTarget === index ? "rgba(255, 217, 0, 1)" : "black",
+            borderWidth: boxTarget === index ? 2 : 1,
+            borderTopWidth: 2,
+            borderLeftWidth: 2,
             backgroundColor: open
               ? "rgba(235, 235, 235, 0.9)"
               : "rgba(122, 122, 122, 0.25)",
@@ -194,7 +194,6 @@ const Container = ({
               alignContent: "center",
               gap: 6,
               backgroundColor: "rgba(235, 235, 235, 0.9)",
-              boxShadow: "4px 4px 4px black",
               borderRadius: 5,
               overflow: "hidden",
               paddingHorizontal: 4,
@@ -213,10 +212,9 @@ const Container = ({
                       borderRadius: 2,
                       overflow: "hidden",
                       // transform: [{ rotate: `${card.rotation}deg` }],
-                      borderColor: "indianred",
+                      borderColor: "black",
                       borderWidth: 1,
-                      boxShadow: "2px 2px 2px black",
-                      opacity: hasFour ? 1 : 0.4,
+                      opacity: hasFour ? 1 : 0.5,
                     }}
                     key={i}
                   >

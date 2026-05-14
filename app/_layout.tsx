@@ -1,4 +1,6 @@
+import { AudioProvider } from "@/context/AudioContext";
 import { LanguageProvider } from "@/context/LanguageContext";
+import { MuteProvider } from "@/context/MuteContext";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -9,9 +11,13 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider style={{ width: "100%" }}>
       <LanguageProvider>
-        <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-        </Stack>
+        <MuteProvider>
+          <AudioProvider>
+            <Stack>
+              <Stack.Screen name="index" options={{ headerShown: false }} />
+            </Stack>
+          </AudioProvider>
+        </MuteProvider>
       </LanguageProvider>
     </SafeAreaProvider>
   );

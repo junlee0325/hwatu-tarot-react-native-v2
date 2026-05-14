@@ -23,13 +23,13 @@ interface Card {
 
 type Props = {
   handleReset: () => void;
-  setResetOpen: (value: boolean) => void;
+  setImpossible: (value: boolean) => void;
 };
 
 const close = { en: "Close", ko: "닫기" };
 const question = {
-  en: "Are you sure you want to restart?",
-  ko: "정말 다시 시작하시겠습니까?",
+  en: "Impossible Deck.",
+  ko: "진행이 불가능합니다.",
 };
 const reset = { en: "Restart", ko: "재시작" };
 
@@ -50,7 +50,7 @@ const months: String[] = [
 
 const ranks = ["A", "B", "C", "D"];
 
-const ResetOverlay = ({ handleReset, setResetOpen }: Props) => {
+const ImpossibleOverlay = ({ handleReset, setImpossible }: Props) => {
   const { width: vw, height: vh } = Dimensions.get("window");
 
   const { lang } = useLanguage();
@@ -78,7 +78,7 @@ const ResetOverlay = ({ handleReset, setResetOpen }: Props) => {
       toValue: 0,
       duration: 300,
       useNativeDriver: true,
-    }).start(() => setResetOpen(false));
+    }).start(() => setImpossible(false));
   };
 
   return (
@@ -241,6 +241,6 @@ const ResetOverlay = ({ handleReset, setResetOpen }: Props) => {
   );
 };
 
-export default ResetOverlay;
+export default ImpossibleOverlay;
 
 const styles = StyleSheet.create({});

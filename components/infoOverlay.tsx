@@ -604,8 +604,8 @@ const InfoOverlay = ({ setOpenInfo, deck, imageSet }: Props) => {
     "Gugi-Regular": require("../assets/fonts/Gugi-Regular.ttf"),
   });
 
-  const [translateClose] = useState(new Animated.Value(0));
-  const [translateLang] = useState(new Animated.Value(0));
+  const [translateClose, setTranslateClose] = useState(0);
+  const [translateLang, setTranslateLang] = useState(0);
   const [opacity] = useState(new Animated.Value(0));
   const [english, setEnglish] = useState(true);
 
@@ -633,14 +633,14 @@ const InfoOverlay = ({ setOpenInfo, deck, imageSet }: Props) => {
     setLang(lang === "en" ? "ko" : "en");
   };
 
-  const onPressIn = (animVar: Animated.Value) => {
-    Haptics.selectionAsync();
-    Animated.spring(animVar, { toValue: 2, useNativeDriver: true }).start();
-  };
+  // const onPressIn = (animVar: Animated.Value) => {
+  //   Haptics.selectionAsync();
+  //   Animated.spring(animVar, { toValue: 2, useNativeDriver: true }).start();
+  // };
 
-  const onPressOut = (animVar: Animated.Value) => {
-    Animated.spring(animVar, { toValue: 0, useNativeDriver: true }).start();
-  };
+  // const onPressOut = (animVar: Animated.Value) => {
+  //   Animated.spring(animVar, { toValue: 0, useNativeDriver: true }).start();
+  // };
 
   if (!fontsLoaded) return null;
 
@@ -655,6 +655,7 @@ const InfoOverlay = ({ setOpenInfo, deck, imageSet }: Props) => {
         </View>
 
         {/* Instructions */}
+
         <ScrollView
           style={styles.instructionScroll}
           contentContainerStyle={styles.instructionContent}
@@ -682,13 +683,19 @@ const InfoOverlay = ({ setOpenInfo, deck, imageSet }: Props) => {
           <Pressable
             style={{ flex: 3 }}
             onPress={handleClose}
-            onPressIn={() => onPressIn(translateClose)}
-            onPressOut={() => onPressOut(translateClose)}
+            onPressIn={() => setTranslateClose(2)}
+            onPressOut={() => setTranslateClose(0)}
           >
             <Animated.View
               style={[
                 styles.closeBtn,
                 { transform: [{ translateY: translateClose }] },
+                {
+                  backgroundColor:
+                    translateClose === 2
+                      ? "rgb(255, 80, 80)"
+                      : "rgb(219, 0, 0)",
+                },
               ]}
             >
               <Text style={styles.closeBtnText} allowFontScaling={false}>
@@ -701,11 +708,11 @@ const InfoOverlay = ({ setOpenInfo, deck, imageSet }: Props) => {
             style={{ flex: 1 }}
             onPress={toggleLang}
             onPressIn={() => {
-              onPressIn(translateLang);
+              setTranslateLang(2);
               setEnglish(false);
             }}
             onPressOut={() => {
-              onPressOut(translateLang);
+              setTranslateLang(0);
               setEnglish(true);
             }}
           >
@@ -713,20 +720,16 @@ const InfoOverlay = ({ setOpenInfo, deck, imageSet }: Props) => {
               style={[
                 styles.langBtn,
                 { transform: [{ translateY: translateLang }] },
+                {
+                  backgroundColor:
+                    translateLang === 2
+                      ? "rgb(158, 158, 158)"
+                      : "rgb(88, 88, 88)",
+                },
               ]}
             >
-              <Ionicons
-                name="globe-outline"
-                size={vw * 0.04}
-                color={english ? "white" : "rgba(255,255,255,0.5)"}
-              />
-              <Text
-                style={[
-                  styles.langBtnText,
-                  { color: english ? "white" : "rgba(255,255,255,0.5)" },
-                ]}
-                allowFontScaling={false}
-              >
+              <Ionicons name="globe-outline" size={vw * 0.04} color="white" />
+              <Text style={[styles.langBtnText]} allowFontScaling={false}>
                 {infoStrings.langToggle[lang]}
               </Text>
             </Animated.View>
@@ -756,7 +759,7 @@ const styles = StyleSheet.create({
     width: "90%",
     height: "70%",
     gap: 10,
-    boxShadow: "inset 1px 2px 3px 3px white, 1px 3px 3px 2px black",
+    // boxShadow: "inset 1px 2px 3px 3px white, 1px 3px 3px 2px black",
   },
   header: {
     height: vh * 0.06,
@@ -776,7 +779,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(235, 235, 235, 0.8)",
     borderRadius: 10,
     padding: 15,
-    boxShadow: "inset 1px 1px 4px black",
   },
   instructionContent: {
     gap: 10,
@@ -791,7 +793,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(235, 235, 235, 0.8)",
     borderRadius: 10,
     padding: 15,
-    boxShadow: "inset 1px 1px 4px black",
+    // boxShadow: "inset 1px 1px 4px black",
   },
   cardListContent: {
     gap: 5,
@@ -813,10 +815,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 3,
     overflow: "hidden",
-    borderColor: "indianred",
+    borderColor: "black",
     position: "absolute",
     backgroundColor: "white",
-    boxShadow: "3px 3px 4px black",
+    // boxShadow: "3px 3px 4px black",
   },
   fullImage: {
     width: "100%",
@@ -854,12 +856,21 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   closeBtn: {
-    backgroundColor: "rgb(219, 0, 0)",
     height: "100%",
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
-    boxShadow: "inset 2px 2px 2px white, 2px 2px 2px 1px black",
+    // boxShadow: "inset 2px 2px 2px white, 2px 2px 2px 1px black",
+    // borderTopColor: "white",
+    // borderLeftColor: "white",
+    // borderBottomColor: "black",
+    // borderRightColor: "black",
+    // borderTopWidth: 3,
+    // borderLeftWidth: 3,
+    // borderBottomWidth: 3,
+    // borderRightWidth: 3,
+    borderWidth: 3,
+    borderColor: "rgba(240, 148, 148, 0)",
   },
   closeBtnText: {
     color: "white",
@@ -868,16 +879,19 @@ const styles = StyleSheet.create({
   },
   langBtn: {
     flexDirection: "row",
-    backgroundColor: "rgb(88, 88, 88)",
+    // backgroundColor: "rgb(88, 88, 88)",
     height: "100%",
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
     gap: 4,
-    boxShadow: "inset 2px 2px 2px white, 2px 2px 2px 1px black",
+    // boxShadow: "inset 2px 2px 2px white, 2px 2px 2px 1px black",
+    borderWidth: 3,
+    borderColor: "rgba(248, 248, 248, 0)",
   },
   langBtnText: {
     fontSize: vw * 0.035,
     fontWeight: "500",
+    color: "white",
   },
 });

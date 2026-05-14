@@ -170,7 +170,7 @@ const ResultsOverlay = ({
           justifyContent: "space-between",
           alignItems: "center",
           gap: 10,
-          boxShadow: "inset 1px 2px 3px 3px white, 1px 3px 3px 2px black",
+          // boxShadow: "inset 1px 2px 3px 3px white, 1px 3px 3px 2px black",
         }}
       >
         <View
@@ -289,7 +289,7 @@ const ResultsOverlay = ({
                 overflow: "hidden",
                 borderColor: "black",
                 padding: 10,
-                boxShadow: "inset 1px 1px 4px black",
+                // boxShadow: "inset 1px 1px 4px black",
                 backgroundColor: "rgba(235, 235, 235, 0.8)",
               }}
               contentContainerStyle={{
@@ -326,14 +326,14 @@ const ResultsOverlay = ({
                           borderWidth: 1,
                           borderRadius: 3,
                           overflow: "hidden",
-                          borderColor: "indianred",
+                          borderColor: "black",
                           position: "absolute",
                           transform: [
                             { translateX: index * 25 },
                             { rotate: `${card.rotation}deg` },
                           ],
                           zIndex: 4 - index,
-                          boxShadow: "3px 3px 4px black",
+                          // boxShadow: "3px 3px 4px black",
                         }}
                       >
                         <Image
@@ -438,13 +438,16 @@ const ResultsOverlay = ({
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                backgroundColor: "rgb(219, 0, 0)",
+                backgroundColor:
+                  translateClose === 2 ? "rgb(255, 80, 80)" : "rgb(219, 0, 0)",
                 paddingVertical: 0,
                 height: "100%",
                 width: "100%",
                 borderRadius: 10,
                 overflow: "hidden",
-                boxShadow: "inset 2px 2px 2px white, 2px 2px 2px 1px black",
+                // boxShadow: "inset 2px 2px 2px white, 2px 2px 2px 1px black",
+                borderWidth: 3,
+                borderColor: "rgba(255, 190, 190, 0)",
                 transform: [{ translateY: translateClose }],
               }}
             >

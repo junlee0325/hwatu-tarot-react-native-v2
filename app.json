@@ -14,11 +14,15 @@
     "android": {
       "icon": "./assets/icon2.png",
       "adaptiveIcon": {
-  "foregroundImage": "./assets/icon1.png",
-  "backgroundColor": "#1b3320"
-},
+        "foregroundImage": "./assets/icon1.png",
+        "backgroundColor": "#1b3320"
+      },
       "predictiveBackGestureEnabled": false,
-      "package": "com.junlee0325.hwatutarotv2"
+      "package": "com.junlee0325.hwatutarotv2",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "web": {
       "output": "static",
@@ -42,6 +46,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "70cc5093-74ac-4da7-9dd8-e6b8c3c40f86"
+      }
     }
   }
 }

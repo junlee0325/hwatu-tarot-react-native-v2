@@ -223,7 +223,6 @@ import {
   useFonts as useJuaFonts,
 } from "@expo-google-fonts/jua";
 import * as Haptics from "expo-haptics";
-import React from "react";
 import {
   Dimensions,
   Image,
@@ -359,6 +358,7 @@ const FourStack = ({
                     fontWeight: "500",
                     paddingVertical: 1,
                   }}
+                  allowFontScaling={false}
                 >
                   {x.title[lang]}
                 </Text>

@@ -755,7 +755,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useFonts } from "expo-font";
 import * as Haptics from "expo-haptics";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Dimensions,
@@ -1031,6 +1031,7 @@ const Controls = ({
               size={36}
               color="rgba(255, 255, 255, 0.75)"
               style={{ padding: 4, zIndex: 50, opacity: touch ? 1 : 0.5 }}
+              allowFontScaling={false}
             />
             {remaining.slice(-3).map((x, i) => (
               <Animated.View

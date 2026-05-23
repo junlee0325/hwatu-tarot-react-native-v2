@@ -471,7 +471,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useFonts } from "expo-font";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image"; // Optimized for performance
-import React, { memo, useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import {
   Animated,
   Dimensions,
@@ -580,15 +580,15 @@ const CardRow = memo(
               { flexDirection: lang === "en" ? "row" : "row-reverse" },
             ]}
           >
-            <Text style={styles.boldText} allowFontScaling={true}>
+            <Text style={styles.boldText} allowFontScaling={false}>
               {group[0].title.en}
             </Text>
-            <Text style={styles.boldText} allowFontScaling={true}>
+            <Text style={styles.boldText} allowFontScaling={false}>
               {group[0].title.ko}
             </Text>
           </View>
           <View style={styles.divider} />
-          <Text style={styles.meaningText} allowFontScaling={true}>
+          <Text style={styles.meaningText} allowFontScaling={false}>
             {group[0].meaning[lang]}
           </Text>
         </View>
@@ -661,7 +661,11 @@ const InfoOverlay = ({ setOpenInfo, deck, imageSet }: Props) => {
           contentContainerStyle={styles.instructionContent}
         >
           {Object.values(instructions[lang]).map((text, idx) => (
-            <Text key={idx} style={styles.instructionText}>
+            <Text
+              key={idx}
+              style={styles.instructionText}
+              allowFontScaling={false}
+            >
               {text}
             </Text>
           ))}
@@ -782,17 +786,17 @@ const styles = StyleSheet.create({
   },
   instructionContent: {
     gap: 10,
-    paddingBottom: 20,
+    paddingBottom: 50,
   },
   instructionText: {
-    fontSize: vw * 0.035,
+    fontSize: vw * 0.04,
     fontFamily: "GowunDodum-Regular",
   },
   cardListScroll: {
     height: "50%",
     backgroundColor: "rgba(235, 235, 235, 0.8)",
     borderRadius: 10,
-    padding: 15,
+    padding: 10,
     // boxShadow: "inset 1px 1px 4px black",
   },
   cardListContent: {
@@ -804,6 +808,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
+    borderTopColor: "black",
+    borderTopWidth: 1,
+    borderStyle: "dashed",
+    paddingTop: 5,
   },
   cardStackContainer: {
     width: "40%",
@@ -840,12 +848,12 @@ const styles = StyleSheet.create({
   },
   divider: {
     width: "100%",
-    height: 1,
+    height: 2,
     backgroundColor: "black",
     marginVertical: 2,
   },
   meaningText: {
-    fontSize: vw * 0.032,
+    fontSize: vw * 0.035,
     fontFamily: "GowunDodum-Regular",
     paddingTop: 2,
   },

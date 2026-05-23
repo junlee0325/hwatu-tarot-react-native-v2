@@ -426,7 +426,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useFonts } from "expo-font";
 import * as Haptics from "expo-haptics";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   Image,
@@ -667,6 +667,7 @@ const PlayArea = ({
                 fontWeight: "500",
                 paddingVertical: 1,
               }}
+              allowFontScaling={false}
             >
               {x.title[lang]}
             </Text>

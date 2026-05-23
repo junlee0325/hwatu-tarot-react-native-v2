@@ -1,7 +1,7 @@
 import { useLanguage } from "@/context/LanguageContext";
 import { useFonts } from "expo-font";
 import * as Haptics from "expo-haptics";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Animated,
   Dimensions,
@@ -310,9 +310,9 @@ const ResultsOverlay = ({
                     flexWrap: "wrap",
                     justifyContent: "space-between",
                     alignItems: "flex-start",
-
-                    // borderWidth: 1,
-                    // borderColor: "blue",
+                    borderTopWidth: 1,
+                    paddingTop: 5,
+                    borderStyle: "dashed",
                   }}
                 >
                   <View style={{ width: "40%" }}>
@@ -367,22 +367,22 @@ const ResultsOverlay = ({
                     >
                       <Text
                         style={{
-                          fontSize: vw * 0.04,
+                          fontSize: vw * 0.035,
                           fontWeight: "bold",
                           fontFamily: "GowunDodum-Regular",
                           textAlign: "right",
                         }}
-                        allowFontScaling={true}
+                        allowFontScaling={false}
                       >
                         {matches[i][1].title.en}
                       </Text>
                       <Text
                         style={{
-                          fontSize: vw * 0.04,
+                          fontSize: vw * 0.035,
                           fontWeight: "bold",
                           fontFamily: "GowunDodum-Regular",
                         }}
-                        allowFontScaling={true}
+                        allowFontScaling={false}
                       >
                         {matches[i][1].title.ko}
                       </Text>
@@ -390,17 +390,18 @@ const ResultsOverlay = ({
                     <View
                       style={{
                         width: "100%",
-                        height: 1,
+                        height: 2,
                         backgroundColor: "black",
+                        marginVertical: 2,
                       }}
                     ></View>
                     <Text
                       style={{
                         fontSize: vw * 0.035,
-                        paddingTop: 4,
+                        paddingTop: 2,
                         fontFamily: "GowunDodum-Regular",
                       }}
-                      allowFontScaling={true}
+                      allowFontScaling={false}
                     >
                       {matches[i][1].meaning[lang]}
                     </Text>

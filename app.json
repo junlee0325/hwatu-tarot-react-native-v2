@@ -7,7 +7,6 @@
     "icon": "./assets/icon2.png",
     "scheme": "hwatutarotv2",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },

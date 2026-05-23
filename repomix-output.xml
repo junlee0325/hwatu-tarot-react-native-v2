@@ -46,7 +46,6 @@ app/_layout.tsx
 app/(tabs)/_layout.tsx
 app/(tabs)/explore.tsx
 app/index.tsx
-app/modal.tsx
 assets/background/fabric.webp
 assets/background/fabric2.webp
 assets/cardImgs/apr.webp
@@ -232,6 +231,7 @@ constants/theme.ts
 context/AudioContext.tsx
 context/LanguageContext.tsx
 context/MuteContext.tsx
+eas.json
 eslint.config.js
 hooks/use-color-scheme.ts
 hooks/use-color-scheme.web.ts
@@ -244,6 +244,240 @@ tsconfig.json
 
 <files>
 This section contains the contents of the repository's files.
+
+<file path=".gitignore">
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env*.local
+
+# typescript
+*.tsbuildinfo
+
+app-example
+
+# generated native folders
+/ios
+/android
+</file>
+
+<file path="app/(tabs)/_layout.tsx">
+import { Tabs } from 'expo-router';
+import React from 'react';
+
+import { HapticTab } from '@/components/haptic-tab';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+
+export default function TabLayout() {
+  const colorScheme = useColorScheme();
+
+  return (
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        headerShown: false,
+        tabBarButton: HapticTab,
+      }}>
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Home',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="explore"
+        options={{
+          title: 'Explore',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+        }}
+      />
+    </Tabs>
+  );
+}
+</file>
+
+<file path="assets/images.ts">
+export const cardImgs: Record<string, number> = {
+  // January
+  'janA': require('../assets/cardImgs/janA.webp'),
+  'janB': require('../assets/cardImgs/janB.webp'),
+  'janC': require('../assets/cardImgs/janC.webp'),
+  'janD': require('../assets/cardImgs/janD.webp'),
+
+  // February
+  'febA': require('../assets/cardImgs/febA.webp'),
+  'febB': require('../assets/cardImgs/febB.webp'),
+  'febC': require('../assets/cardImgs/febC.webp'),
+  'febD': require('../assets/cardImgs/febD.webp'),
+
+  // March
+  'marA': require('../assets/cardImgs/marA.webp'),
+  'marB': require('../assets/cardImgs/marB.webp'),
+  'marC': require('../assets/cardImgs/marC.webp'),
+  'marD': require('../assets/cardImgs/marD.webp'),
+
+  // April
+  'aprA': require('../assets/cardImgs/aprA.webp'),
+  'aprB': require('../assets/cardImgs/aprB.webp'),
+  'aprC': require('../assets/cardImgs/aprC.webp'),
+  'aprD': require('../assets/cardImgs/aprD.webp'),
+
+  // May
+  'mayA': require('../assets/cardImgs/mayA.webp'),
+  'mayB': require('../assets/cardImgs/mayB.webp'),
+  'mayC': require('../assets/cardImgs/mayC.webp'),
+  'mayD': require('../assets/cardImgs/mayD.webp'),
+
+  // June
+  'junA': require('../assets/cardImgs/junA.webp'),
+  'junB': require('../assets/cardImgs/junB.webp'),
+  'junC': require('../assets/cardImgs/junC.webp'),
+  'junD': require('../assets/cardImgs/junD.webp'),
+
+  // July
+  'julA': require('../assets/cardImgs/julA.webp'),
+  'julB': require('../assets/cardImgs/julB.webp'),
+  'julC': require('../assets/cardImgs/julC.webp'),
+  'julD': require('../assets/cardImgs/julD.webp'),
+
+  // August
+  'augA': require('../assets/cardImgs/augA.webp'),
+  'augB': require('../assets/cardImgs/augB.webp'),
+  'augC': require('../assets/cardImgs/augC.webp'),
+  'augD': require('../assets/cardImgs/augD.webp'),
+
+  // September
+  'sepA': require('../assets/cardImgs/sepA.webp'),
+  'sepB': require('../assets/cardImgs/sepB.webp'),
+  'sepC': require('../assets/cardImgs/sepC.webp'),
+  'sepD': require('../assets/cardImgs/sepD.webp'),
+
+  // October
+  'octA': require('../assets/cardImgs/octA.webp'),
+  'octB': require('../assets/cardImgs/octB.webp'),
+  'octC': require('../assets/cardImgs/octC.webp'),
+  'octD': require('../assets/cardImgs/octD.webp'),
+
+  // November
+  'novA': require('../assets/cardImgs/novA.webp'),
+  'novB': require('../assets/cardImgs/novB.webp'),
+  'novC': require('../assets/cardImgs/novC.webp'),
+  'novD': require('../assets/cardImgs/novD.webp'),
+
+  // December
+  'decA': require('../assets/cardImgs/decA.webp'),
+  'decB': require('../assets/cardImgs/decB.webp'),
+  'decC': require('../assets/cardImgs/decC.webp'),
+  'decD': require('../assets/cardImgs/decD.webp'),
+
+  // Back
+  'back': require('../assets/cardImgs/back.webp')
+};
+</file>
+
+<file path="components/external-link.tsx">
+import { Href, Link } from 'expo-router';
+import { openBrowserAsync, WebBrowserPresentationStyle } from 'expo-web-browser';
+import { type ComponentProps } from 'react';
+
+type Props = Omit<ComponentProps<typeof Link>, 'href'> & { href: Href & string };
+
+export function ExternalLink({ href, ...rest }: Props) {
+  return (
+    <Link
+      target="_blank"
+      {...rest}
+      href={href}
+      onPress={async (event) => {
+        if (process.env.EXPO_OS !== 'web') {
+          // Prevent the default behavior of linking to the default browser on native.
+          event.preventDefault();
+          // Open the link in an in-app browser.
+          await openBrowserAsync(href, {
+            presentationStyle: WebBrowserPresentationStyle.AUTOMATIC,
+          });
+        }
+      }}
+    />
+  );
+}
+</file>
+
+<file path="components/haptic-tab.tsx">
+import { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
+import { PlatformPressable } from '@react-navigation/elements';
+import * as Haptics from 'expo-haptics';
+
+export function HapticTab(props: BottomTabBarButtonProps) {
+  return (
+    <PlatformPressable
+      {...props}
+      onPressIn={(ev) => {
+        if (process.env.EXPO_OS === 'ios') {
+          // Add a soft haptic feedback when pressing down on the tabs.
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+        props.onPressIn?.(ev);
+      }}
+    />
+  );
+}
+</file>
+
+<file path="components/hello-wave.tsx">
+import Animated from 'react-native-reanimated';
+
+export function HelloWave() {
+  return (
+    <Animated.Text
+      style={{
+        fontSize: 28,
+        lineHeight: 32,
+        marginTop: -6,
+        animationName: {
+          '50%': { transform: [{ rotate: '25deg' }] },
+        },
+        animationIterationCount: 4,
+        animationDuration: '300ms',
+      }}>
+      👋
+    </Animated.Text>
+  );
+}
+</file>
 
 <file path="components/impossibleOverlay.tsx">
 import { useLanguage } from "@/context/LanguageContext";
@@ -494,6 +728,601 @@ export default ImpossibleOverlay;
 const styles = StyleSheet.create({});
 </file>
 
+<file path="components/optionsOverlay.tsx">
+import Feather from "@expo/vector-icons/Feather";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import * as Haptics from "expo-haptics";
+import React, { useEffect, useState } from "react";
+import {
+  Animated,
+  Dimensions,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+
+interface Card {
+  month: string; // e.g., "Jan", "Feb", etc.
+  rank: string;
+  id: string; // optional, unique identifier
+  img: string;
+  rotation: number;
+  title: { en: string; ko: string };
+  meaning: { en: string; ko: string };
+}
+
+type Props = {
+  setOpenOptions: (value: boolean) => void;
+  mute: boolean;
+  setMute: (value: boolean) => void;
+  showLabels: boolean;
+  setShowLabels: (value: boolean) => void;
+};
+
+const OptionsOverlay = ({
+  setOpenOptions,
+  mute,
+  setMute,
+  showLabels,
+  setShowLabels,
+}: Props) => {
+  const { width: vw } = Dimensions.get("window");
+
+  const [scale] = useState(new Animated.Value(1));
+  const [opacity] = useState(new Animated.Value(0));
+
+  useEffect(() => {
+    Animated.timing(opacity, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
+  const handlePressIn = () => {
+    Haptics.selectionAsync();
+    Animated.spring(scale, {
+      toValue: 0.75,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scale, {
+      toValue: 1,
+      friction: 3,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handleClose = () => {
+    Animated.timing(opacity, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => setOpenOptions(false));
+  };
+
+  const [sound, setSound] = useState(true);
+  const [labels, setLabels] = useState(true);
+
+  return (
+    <Animated.View
+      style={{
+        position: "absolute",
+        width: "100%",
+        height: "100%",
+        zIndex: 20,
+        backgroundColor: "rgba(255, 255, 255, 0.25)",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        opacity,
+      }}
+    >
+      <View
+        style={{
+          backgroundColor: "rgba(255, 217, 0, 1)",
+          borderRadius: 10,
+          overflow: "hidden",
+          padding: 10,
+          width: "90%",
+          height: "30%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          alignItems: "center",
+          boxShadow: "inset 2px 2px 2px white, 2px 2px 2px 1px black",
+        }}
+      >
+        <View
+          style={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "row",
+            flexWrap: "nowrap",
+            justifyContent: "space-evenly",
+            alignItems: "center",
+            height: "70%",
+            paddingVertical: 5,
+            borderRadius: 8,
+            overflow: "hidden",
+          }}
+        >
+          <Pressable
+            style={{ width: "30%" }}
+            onPressIn={() => {
+              Haptics.selectionAsync();
+              setSound(false);
+            }}
+            onPressOut={() => {
+              setSound(true);
+              setMute(!mute);
+            }}
+          >
+            {!mute ? (
+              <View
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: 10,
+                }}
+              >
+                <Feather
+                  name="volume-2"
+                  size={60}
+                  color={sound ? "black" : "red"}
+                />
+                <Text style={{ color: sound ? "black" : "red" }}>Sound ON</Text>
+              </View>
+            ) : (
+              <View
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: 10,
+                }}
+              >
+                <Feather
+                  name="volume-x"
+                  size={60}
+                  color={sound ? "black" : "red"}
+                />
+                <Text style={{ color: sound ? "black" : "red" }}>
+                  Sound OFF
+                </Text>
+              </View>
+            )}
+          </Pressable>
+          <Pressable
+            style={{ width: "30%" }}
+            onPressIn={() => {
+              Haptics.selectionAsync();
+              setLabels(false);
+            }}
+            onPressOut={() => {
+              setLabels(true);
+              setShowLabels(!showLabels);
+            }}
+          >
+            {showLabels ? (
+              <View
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: 10,
+                }}
+              >
+                <MaterialCommunityIcons
+                  name="label-outline"
+                  size={60}
+                  color={labels ? "black" : "red"}
+                />
+                <Text style={{ color: labels ? "black" : "red" }}>
+                  Labels ON
+                </Text>
+              </View>
+            ) : (
+              <View
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: 10,
+                }}
+              >
+                <MaterialCommunityIcons
+                  name="label-off-outline"
+                  size={60}
+                  color={labels ? "black" : "red"}
+                />
+                <Text style={{ color: labels ? "black" : "red" }}>
+                  Labels OFF
+                </Text>
+              </View>
+            )}
+          </Pressable>
+        </View>
+        <View style={{ height: "30%" }}>
+          <Pressable
+            onPress={() => handleClose()}
+            onPressIn={() => handlePressIn()}
+            onPressOut={() => handlePressOut()}
+          >
+            <Animated.View
+              style={{
+                backgroundColor: "rgba(224, 0, 0, 1)",
+                paddingVertical: 10,
+                paddingHorizontal: 20,
+                borderRadius: 10,
+                overflow: "hidden",
+                boxShadow: "inset 2px 2px 2px white, 2px 2px 2px 1px black",
+                transform: [{ scale }],
+              }}
+            >
+              <Text style={{ color: "white", fontWeight: "bold" }}>Close</Text>
+            </Animated.View>
+          </Pressable>
+        </View>
+      </View>
+    </Animated.View>
+  );
+};
+
+export default OptionsOverlay;
+
+const styles = StyleSheet.create({});
+</file>
+
+<file path="components/parallax-scroll-view.tsx">
+import type { PropsWithChildren, ReactElement } from 'react';
+import { StyleSheet } from 'react-native';
+import Animated, {
+  interpolate,
+  useAnimatedRef,
+  useAnimatedStyle,
+  useScrollOffset,
+} from 'react-native-reanimated';
+
+import { ThemedView } from '@/components/themed-view';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useThemeColor } from '@/hooks/use-theme-color';
+
+const HEADER_HEIGHT = 250;
+
+type Props = PropsWithChildren<{
+  headerImage: ReactElement;
+  headerBackgroundColor: { dark: string; light: string };
+}>;
+
+export default function ParallaxScrollView({
+  children,
+  headerImage,
+  headerBackgroundColor,
+}: Props) {
+  const backgroundColor = useThemeColor({}, 'background');
+  const colorScheme = useColorScheme() ?? 'light';
+  const scrollRef = useAnimatedRef<Animated.ScrollView>();
+  const scrollOffset = useScrollOffset(scrollRef);
+  const headerAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          translateY: interpolate(
+            scrollOffset.value,
+            [-HEADER_HEIGHT, 0, HEADER_HEIGHT],
+            [-HEADER_HEIGHT / 2, 0, HEADER_HEIGHT * 0.75]
+          ),
+        },
+        {
+          scale: interpolate(scrollOffset.value, [-HEADER_HEIGHT, 0, HEADER_HEIGHT], [2, 1, 1]),
+        },
+      ],
+    };
+  });
+
+  return (
+    <Animated.ScrollView
+      ref={scrollRef}
+      style={{ backgroundColor, flex: 1 }}
+      scrollEventThrottle={16}>
+      <Animated.View
+        style={[
+          styles.header,
+          { backgroundColor: headerBackgroundColor[colorScheme] },
+          headerAnimatedStyle,
+        ]}>
+        {headerImage}
+      </Animated.View>
+      <ThemedView style={styles.content}>{children}</ThemedView>
+    </Animated.ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  header: {
+    height: HEADER_HEIGHT,
+    overflow: 'hidden',
+  },
+  content: {
+    flex: 1,
+    padding: 32,
+    gap: 16,
+    overflow: 'hidden',
+  },
+});
+</file>
+
+<file path="components/themed-text.tsx">
+import { StyleSheet, Text, type TextProps } from 'react-native';
+
+import { useThemeColor } from '@/hooks/use-theme-color';
+
+export type ThemedTextProps = TextProps & {
+  lightColor?: string;
+  darkColor?: string;
+  type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link';
+};
+
+export function ThemedText({
+  style,
+  lightColor,
+  darkColor,
+  type = 'default',
+  ...rest
+}: ThemedTextProps) {
+  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+
+  return (
+    <Text
+      style={[
+        { color },
+        type === 'default' ? styles.default : undefined,
+        type === 'title' ? styles.title : undefined,
+        type === 'defaultSemiBold' ? styles.defaultSemiBold : undefined,
+        type === 'subtitle' ? styles.subtitle : undefined,
+        type === 'link' ? styles.link : undefined,
+        style,
+      ]}
+      {...rest}
+    />
+  );
+}
+
+const styles = StyleSheet.create({
+  default: {
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  defaultSemiBold: {
+    fontSize: 16,
+    lineHeight: 24,
+    fontWeight: '600',
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    lineHeight: 32,
+  },
+  subtitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  link: {
+    lineHeight: 30,
+    fontSize: 16,
+    color: '#0a7ea4',
+  },
+});
+</file>
+
+<file path="components/themed-view.tsx">
+import { View, type ViewProps } from 'react-native';
+
+import { useThemeColor } from '@/hooks/use-theme-color';
+
+export type ThemedViewProps = ViewProps & {
+  lightColor?: string;
+  darkColor?: string;
+};
+
+export function ThemedView({ style, lightColor, darkColor, ...otherProps }: ThemedViewProps) {
+  const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
+
+  return <View style={[{ backgroundColor }, style]} {...otherProps} />;
+}
+</file>
+
+<file path="components/ui/collapsible.tsx">
+import { PropsWithChildren, useState } from 'react';
+import { StyleSheet, TouchableOpacity } from 'react-native';
+
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+
+export function Collapsible({ children, title }: PropsWithChildren & { title: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const theme = useColorScheme() ?? 'light';
+
+  return (
+    <ThemedView>
+      <TouchableOpacity
+        style={styles.heading}
+        onPress={() => setIsOpen((value) => !value)}
+        activeOpacity={0.8}>
+        <IconSymbol
+          name="chevron.right"
+          size={18}
+          weight="medium"
+          color={theme === 'light' ? Colors.light.icon : Colors.dark.icon}
+          style={{ transform: [{ rotate: isOpen ? '90deg' : '0deg' }] }}
+        />
+
+        <ThemedText type="defaultSemiBold">{title}</ThemedText>
+      </TouchableOpacity>
+      {isOpen && <ThemedView style={styles.content}>{children}</ThemedView>}
+    </ThemedView>
+  );
+}
+
+const styles = StyleSheet.create({
+  heading: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  content: {
+    marginTop: 6,
+    marginLeft: 24,
+  },
+});
+</file>
+
+<file path="components/ui/icon-symbol.ios.tsx">
+import { SymbolView, SymbolViewProps, SymbolWeight } from 'expo-symbols';
+import { StyleProp, ViewStyle } from 'react-native';
+
+export function IconSymbol({
+  name,
+  size = 24,
+  color,
+  style,
+  weight = 'regular',
+}: {
+  name: SymbolViewProps['name'];
+  size?: number;
+  color: string;
+  style?: StyleProp<ViewStyle>;
+  weight?: SymbolWeight;
+}) {
+  return (
+    <SymbolView
+      weight={weight}
+      tintColor={color}
+      resizeMode="scaleAspectFit"
+      name={name}
+      style={[
+        {
+          width: size,
+          height: size,
+        },
+        style,
+      ]}
+    />
+  );
+}
+</file>
+
+<file path="components/ui/icon-symbol.tsx">
+// Fallback for using MaterialIcons on Android and web.
+
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { SymbolWeight, SymbolViewProps } from 'expo-symbols';
+import { ComponentProps } from 'react';
+import { OpaqueColorValue, type StyleProp, type TextStyle } from 'react-native';
+
+type IconMapping = Record<SymbolViewProps['name'], ComponentProps<typeof MaterialIcons>['name']>;
+type IconSymbolName = keyof typeof MAPPING;
+
+/**
+ * Add your SF Symbols to Material Icons mappings here.
+ * - see Material Icons in the [Icons Directory](https://icons.expo.fyi).
+ * - see SF Symbols in the [SF Symbols](https://developer.apple.com/sf-symbols/) app.
+ */
+const MAPPING = {
+  'house.fill': 'home',
+  'paperplane.fill': 'send',
+  'chevron.left.forwardslash.chevron.right': 'code',
+  'chevron.right': 'chevron-right',
+} as IconMapping;
+
+/**
+ * An icon component that uses native SF Symbols on iOS, and Material Icons on Android and web.
+ * This ensures a consistent look across platforms, and optimal resource usage.
+ * Icon `name`s are based on SF Symbols and require manual mapping to Material Icons.
+ */
+export function IconSymbol({
+  name,
+  size = 24,
+  color,
+  style,
+}: {
+  name: IconSymbolName;
+  size?: number;
+  color: string | OpaqueColorValue;
+  style?: StyleProp<TextStyle>;
+  weight?: SymbolWeight;
+}) {
+  return <MaterialIcons color={color} size={size} name={MAPPING[name]} style={style} />;
+}
+</file>
+
+<file path="constants/theme.ts">
+/**
+ * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
+ * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
+ */
+
+import { Platform } from 'react-native';
+
+const tintColorLight = '#0a7ea4';
+const tintColorDark = '#fff';
+
+export const Colors = {
+  light: {
+    text: '#11181C',
+    background: '#fff',
+    tint: tintColorLight,
+    icon: '#687076',
+    tabIconDefault: '#687076',
+    tabIconSelected: tintColorLight,
+  },
+  dark: {
+    text: '#ECEDEE',
+    background: '#151718',
+    tint: tintColorDark,
+    icon: '#9BA1A6',
+    tabIconDefault: '#9BA1A6',
+    tabIconSelected: tintColorDark,
+  },
+};
+
+export const Fonts = Platform.select({
+  ios: {
+    /** iOS `UIFontDescriptorSystemDesignDefault` */
+    sans: 'system-ui',
+    /** iOS `UIFontDescriptorSystemDesignSerif` */
+    serif: 'ui-serif',
+    /** iOS `UIFontDescriptorSystemDesignRounded` */
+    rounded: 'ui-rounded',
+    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
+    mono: 'ui-monospace',
+  },
+  default: {
+    sans: 'normal',
+    serif: 'serif',
+    rounded: 'normal',
+    mono: 'monospace',
+  },
+  web: {
+    sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+    serif: "Georgia, 'Times New Roman', serif",
+    rounded: "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
+    mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
+  },
+});
+</file>
+
 <file path="context/AudioContext.tsx">
 import { useAudioPlayer } from "expo-audio";
 import React, { createContext, useContext, useEffect, useRef } from "react";
@@ -577,6 +1406,47 @@ export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
 export const useAudio = () => useContext(AudioContext);
 </file>
 
+<file path="context/LanguageContext.tsx">
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { createContext, useContext, useEffect, useState } from "react";
+
+export type Lang = "en" | "ko";
+
+const LanguageContext = createContext<{
+  lang: Lang;
+  setLang: (lang: Lang) => void;
+}>({
+  lang: "en",
+  setLang: () => {},
+});
+
+export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
+  const [lang, setLang] = useState<Lang>("en");
+
+  useEffect(() => {
+    // Load saved language on mount
+    AsyncStorage.getItem("appLanguage").then((savedLang) => {
+      if (savedLang === "en" || savedLang === "ko") {
+        setLang(savedLang);
+      }
+    });
+  }, []);
+
+  const updateLang = (newLang: Lang) => {
+    setLang(newLang);
+    AsyncStorage.setItem("appLanguage", newLang); // Save to storage
+  };
+
+  return (
+    <LanguageContext.Provider value={{ lang, setLang: updateLang }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+};
+
+export const useLanguage = () => useContext(LanguageContext);
+</file>
+
 <file path="context/MuteContext.tsx">
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useContext, useEffect, useState } from "react";
@@ -613,167 +1483,528 @@ export const MuteProvider = ({ children }: { children: React.ReactNode }) => {
 export const useMute = () => useContext(MuteContext);
 </file>
 
-<file path=".gitignore">
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+<file path="eslint.config.js">
+// https://docs.expo.dev/guides/using-eslint/
+const { defineConfig } = require('eslint/config');
+const expoConfig = require('eslint-config-expo/flat');
 
-# dependencies
-node_modules/
-
-# Expo
-.expo/
-dist/
-web-build/
-expo-env.d.ts
-
-# Native
-.kotlin/
-*.orig.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-
-# Metro
-.metro-health-check*
-
-# debug
-npm-debug.*
-yarn-debug.*
-yarn-error.*
-
-# macOS
-.DS_Store
-*.pem
-
-# local env files
-.env*.local
-
-# typescript
-*.tsbuildinfo
-
-app-example
-
-# generated native folders
-/ios
-/android
+module.exports = defineConfig([
+  expoConfig,
+  {
+    ignores: ['dist/*'],
+  },
+]);
 </file>
 
-<file path="app/(tabs)/_layout.tsx">
-import { Tabs } from 'expo-router';
-import React from 'react';
+<file path="hooks/use-color-scheme.ts">
+export { useColorScheme } from 'react-native';
+</file>
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+<file path="hooks/use-color-scheme.web.ts">
+import { useEffect, useState } from 'react';
+import { useColorScheme as useRNColorScheme } from 'react-native';
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+/**
+ * To support static rendering, this value needs to be re-calculated on the client side for web
+ */
+export function useColorScheme() {
+  const [hasHydrated, setHasHydrated] = useState(false);
 
-  return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
-    </Tabs>
-  );
+  useEffect(() => {
+    setHasHydrated(true);
+  }, []);
+
+  const colorScheme = useRNColorScheme();
+
+  if (hasHydrated) {
+    return colorScheme;
+  }
+
+  return 'light';
 }
 </file>
 
-<file path="assets/images.ts">
-export const cardImgs: Record<string, number> = {
-  // January
-  'janA': require('../assets/cardImgs/janA.webp'),
-  'janB': require('../assets/cardImgs/janB.webp'),
-  'janC': require('../assets/cardImgs/janC.webp'),
-  'janD': require('../assets/cardImgs/janD.webp'),
+<file path="hooks/use-theme-color.ts">
+/**
+ * Learn more about light and dark modes:
+ * https://docs.expo.dev/guides/color-schemes/
+ */
 
-  // February
-  'febA': require('../assets/cardImgs/febA.webp'),
-  'febB': require('../assets/cardImgs/febB.webp'),
-  'febC': require('../assets/cardImgs/febC.webp'),
-  'febD': require('../assets/cardImgs/febD.webp'),
+import { Colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
-  // March
-  'marA': require('../assets/cardImgs/marA.webp'),
-  'marB': require('../assets/cardImgs/marB.webp'),
-  'marC': require('../assets/cardImgs/marC.webp'),
-  'marD': require('../assets/cardImgs/marD.webp'),
+export function useThemeColor(
+  props: { light?: string; dark?: string },
+  colorName: keyof typeof Colors.light & keyof typeof Colors.dark
+) {
+  const theme = useColorScheme() ?? 'light';
+  const colorFromProps = props[theme];
 
-  // April
-  'aprA': require('../assets/cardImgs/aprA.webp'),
-  'aprB': require('../assets/cardImgs/aprB.webp'),
-  'aprC': require('../assets/cardImgs/aprC.webp'),
-  'aprD': require('../assets/cardImgs/aprD.webp'),
+  if (colorFromProps) {
+    return colorFromProps;
+  } else {
+    return Colors[theme][colorName];
+  }
+}
+</file>
 
-  // May
-  'mayA': require('../assets/cardImgs/mayA.webp'),
-  'mayB': require('../assets/cardImgs/mayB.webp'),
-  'mayC': require('../assets/cardImgs/mayC.webp'),
-  'mayD': require('../assets/cardImgs/mayD.webp'),
+<file path="scripts/reset-project.js">
+#!/usr/bin/env node
 
-  // June
-  'junA': require('../assets/cardImgs/junA.webp'),
-  'junB': require('../assets/cardImgs/junB.webp'),
-  'junC': require('../assets/cardImgs/junC.webp'),
-  'junD': require('../assets/cardImgs/junD.webp'),
+/**
+ * This script is used to reset the project to a blank state.
+ * It deletes or moves the /app, /components, /hooks, /scripts, and /constants directories to /app-example based on user input and creates a new /app directory with an index.tsx and _layout.tsx file.
+ * You can remove the `reset-project` script from package.json and safely delete this file after running it.
+ */
 
-  // July
-  'julA': require('../assets/cardImgs/julA.webp'),
-  'julB': require('../assets/cardImgs/julB.webp'),
-  'julC': require('../assets/cardImgs/julC.webp'),
-  'julD': require('../assets/cardImgs/julD.webp'),
+const fs = require("fs");
+const path = require("path");
+const readline = require("readline");
 
-  // August
-  'augA': require('../assets/cardImgs/augA.webp'),
-  'augB': require('../assets/cardImgs/augB.webp'),
-  'augC': require('../assets/cardImgs/augC.webp'),
-  'augD': require('../assets/cardImgs/augD.webp'),
+const root = process.cwd();
+const oldDirs = ["app", "components", "hooks", "constants", "scripts"];
+const exampleDir = "app-example";
+const newAppDir = "app";
+const exampleDirPath = path.join(root, exampleDir);
 
-  // September
-  'sepA': require('../assets/cardImgs/sepA.webp'),
-  'sepB': require('../assets/cardImgs/sepB.webp'),
-  'sepC': require('../assets/cardImgs/sepC.webp'),
-  'sepD': require('../assets/cardImgs/sepD.webp'),
+const indexContent = `import { Text, View } from "react-native";
 
-  // October
-  'octA': require('../assets/cardImgs/octA.webp'),
-  'octB': require('../assets/cardImgs/octB.webp'),
-  'octC': require('../assets/cardImgs/octC.webp'),
-  'octD': require('../assets/cardImgs/octD.webp'),
+export default function Index() {
+  return (
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <Text>Edit app/index.tsx to edit this screen.</Text>
+    </View>
+  );
+}
+`;
 
-  // November
-  'novA': require('../assets/cardImgs/novA.webp'),
-  'novB': require('../assets/cardImgs/novB.webp'),
-  'novC': require('../assets/cardImgs/novC.webp'),
-  'novD': require('../assets/cardImgs/novD.webp'),
+const layoutContent = `import { Stack } from "expo-router";
 
-  // December
-  'decA': require('../assets/cardImgs/decA.webp'),
-  'decB': require('../assets/cardImgs/decB.webp'),
-  'decC': require('../assets/cardImgs/decC.webp'),
-  'decD': require('../assets/cardImgs/decD.webp'),
+export default function RootLayout() {
+  return <Stack />;
+}
+`;
 
-  // Back
-  'back': require('../assets/cardImgs/back.webp')
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
+const moveDirectories = async (userInput) => {
+  try {
+    if (userInput === "y") {
+      // Create the app-example directory
+      await fs.promises.mkdir(exampleDirPath, { recursive: true });
+      console.log(`📁 /${exampleDir} directory created.`);
+    }
+
+    // Move old directories to new app-example directory or delete them
+    for (const dir of oldDirs) {
+      const oldDirPath = path.join(root, dir);
+      if (fs.existsSync(oldDirPath)) {
+        if (userInput === "y") {
+          const newDirPath = path.join(root, exampleDir, dir);
+          await fs.promises.rename(oldDirPath, newDirPath);
+          console.log(`➡️ /${dir} moved to /${exampleDir}/${dir}.`);
+        } else {
+          await fs.promises.rm(oldDirPath, { recursive: true, force: true });
+          console.log(`❌ /${dir} deleted.`);
+        }
+      } else {
+        console.log(`➡️ /${dir} does not exist, skipping.`);
+      }
+    }
+
+    // Create new /app directory
+    const newAppDirPath = path.join(root, newAppDir);
+    await fs.promises.mkdir(newAppDirPath, { recursive: true });
+    console.log("\n📁 New /app directory created.");
+
+    // Create index.tsx
+    const indexPath = path.join(newAppDirPath, "index.tsx");
+    await fs.promises.writeFile(indexPath, indexContent);
+    console.log("📄 app/index.tsx created.");
+
+    // Create _layout.tsx
+    const layoutPath = path.join(newAppDirPath, "_layout.tsx");
+    await fs.promises.writeFile(layoutPath, layoutContent);
+    console.log("📄 app/_layout.tsx created.");
+
+    console.log("\n✅ Project reset complete. Next steps:");
+    console.log(
+      `1. Run \`npx expo start\` to start a development server.\n2. Edit app/index.tsx to edit the main screen.${
+        userInput === "y"
+          ? `\n3. Delete the /${exampleDir} directory when you're done referencing it.`
+          : ""
+      }`
+    );
+  } catch (error) {
+    console.error(`❌ Error during script execution: ${error.message}`);
+  }
 };
+
+rl.question(
+  "Do you want to move existing files to /app-example instead of deleting them? (Y/n): ",
+  (answer) => {
+    const userInput = answer.trim().toLowerCase() || "y";
+    if (userInput === "y" || userInput === "n") {
+      moveDirectories(userInput).finally(() => rl.close());
+    } else {
+      console.log("❌ Invalid input. Please enter 'Y' or 'N'.");
+      rl.close();
+    }
+  }
+);
+</file>
+
+<file path="tsconfig.json">
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
+  ]
+}
+</file>
+
+<file path="app/(tabs)/explore.tsx">
+import { Image } from 'expo-image';
+import { Platform, StyleSheet } from 'react-native';
+
+import { ExternalLink } from '@/components/external-link';
+import ParallaxScrollView from '@/components/parallax-scroll-view';
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { Collapsible } from '@/components/ui/collapsible';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Fonts } from '@/constants/theme';
+
+export default function TabTwoScreen() {
+  return (
+    <ParallaxScrollView
+      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+      headerImage={
+        <IconSymbol
+          size={310}
+          color="#808080"
+          name="chevron.left.forwardslash.chevron.right"
+          style={styles.headerImage}
+        />
+      }>
+      <ThemedView style={styles.titleContainer}>
+        <ThemedText
+          type="title"
+          style={{
+            fontFamily: Fonts.rounded,
+          }}>
+          Explore
+        </ThemedText>
+      </ThemedView>
+      <ThemedText>This app includes example code to help you get started.</ThemedText>
+      <Collapsible title="File-based routing">
+        <ThemedText>
+          This app has two screens:{' '}
+          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
+          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
+        </ThemedText>
+        <ThemedText>
+          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
+          sets up the tab navigator.
+        </ThemedText>
+        <ExternalLink href="https://docs.expo.dev/router/introduction">
+          <ThemedText type="link">Learn more</ThemedText>
+        </ExternalLink>
+      </Collapsible>
+      <Collapsible title="Android, iOS, and web support">
+        <ThemedText>
+          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
+          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
+        </ThemedText>
+      </Collapsible>
+      <Collapsible title="Images">
+        <ThemedText>
+          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
+          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
+          different screen densities
+        </ThemedText>
+        <Image
+          source={require('@/assets/images/react-logo.png')}
+          style={{ width: 100, height: 100, alignSelf: 'center' }}
+        />
+        <ExternalLink href="https://reactnative.dev/docs/images">
+          <ThemedText type="link">Learn more</ThemedText>
+        </ExternalLink>
+      </Collapsible>
+      <Collapsible title="Light and dark mode components">
+        <ThemedText>
+          This template has light and dark mode support. The{' '}
+          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
+          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
+        </ThemedText>
+        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
+          <ThemedText type="link">Learn more</ThemedText>
+        </ExternalLink>
+      </Collapsible>
+      <Collapsible title="Animations">
+        <ThemedText>
+          This template includes an example of an animated component. The{' '}
+          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
+          the powerful{' '}
+          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
+            react-native-reanimated
+          </ThemedText>{' '}
+          library to create a waving hand animation.
+        </ThemedText>
+        {Platform.select({
+          ios: (
+            <ThemedText>
+              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
+              component provides a parallax effect for the header image.
+            </ThemedText>
+          ),
+        })}
+      </Collapsible>
+    </ParallaxScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  headerImage: {
+    color: '#808080',
+    bottom: -90,
+    left: -35,
+    position: 'absolute',
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+});
+</file>
+
+<file path="components/boxCheckOverlay.tsx">
+import { useLanguage } from "@/context/LanguageContext";
+
+import * as Haptics from "expo-haptics";
+import React, { useEffect, useState } from "react";
+import {
+  Animated,
+  Dimensions,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+
+interface Card {
+  month: string; // e.g., "Jan", "Feb", etc.
+  rank: string;
+  id: string; // optional, unique identifier
+  img: string;
+  rotation: number;
+  title: { en: string; ko: string };
+  meaning: { en: string; ko: string };
+}
+
+type Props = {
+  setOpenCheckBox: (value: boolean) => void;
+  selectedBox: Card[];
+  imageSet: Record<string, any>;
+};
+
+const close = { en: "Close", ko: "닫기" };
+
+const BoxCheckOverlay = ({ setOpenCheckBox, selectedBox, imageSet }: Props) => {
+  const { width: vw } = Dimensions.get("window");
+
+  const { lang } = useLanguage();
+
+  const [scale] = useState(new Animated.Value(1));
+  const [opacity] = useState(new Animated.Value(0));
+
+  useEffect(() => {
+    Animated.timing(opacity, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
+  const handlePressIn = () => {
+    Haptics.selectionAsync();
+    Animated.spring(scale, {
+      toValue: 0.75,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scale, {
+      toValue: 1,
+      friction: 3,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handleClose = () => {
+    Animated.timing(opacity, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => setOpenCheckBox(false));
+  };
+
+  const monthCounts = selectedBox.reduce(
+    (acc, card) => {
+      acc[card.month] = (acc[card.month] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
+
+  return (
+    <Animated.View
+      style={{
+        position: "absolute",
+        width: "100%",
+        height: "100%",
+        zIndex: 20,
+        backgroundColor: "rgba(255, 255, 255, 0.3)",
+        opacity,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <View
+        style={{
+          backgroundColor: "rgba(235, 235, 235, 0.8)",
+          borderRadius: 15,
+          overflow: "hidden",
+          padding: 10,
+          width: "90%",
+          height: "30%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          alignItems: "center",
+          boxShadow: "inset 1px 2px 3px 3px white, 1px 3px 3px 2px black",
+        }}
+      >
+        <View
+          style={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "row",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            alignContent: "center",
+            height: "80%",
+            gap: 6,
+            backgroundColor: "rgba(235, 235, 235, 0.8)",
+            boxShadow: "inset 1px 1px 4px black",
+            paddingVertical: 5,
+            borderRadius: 10,
+            overflow: "hidden",
+            paddingHorizontal: 12,
+          }}
+        >
+          {selectedBox.length > 0 &&
+            selectedBox.map((card, i) => {
+              const hasFour = monthCounts[card.month] === 4;
+              return (
+                <View
+                  style={{
+                    width: vw * 0.11,
+                    aspectRatio: 230 / 360,
+                    borderRadius: 2,
+                    overflow: "hidden",
+                    // transform: [{ rotate: `${card.rotation}deg` }],
+                    borderColor: hasFour ? "rgba(255, 217, 0, 1)" : "indianred",
+                    borderWidth: hasFour ? 2 : 1,
+                    boxShadow: hasFour
+                      ? "0px 0px 0px 2px rgba(0, 0, 0, 1)"
+                      : "2px 2px 2px black",
+                  }}
+                  key={i}
+                >
+                  <Image
+                    key={card.id}
+                    source={imageSet[card.img]}
+                    style={{ width: "100%", height: "100%" }}
+                    resizeMode="stretch"
+                  />
+                </View>
+              );
+            })}
+        </View>
+
+        <View
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+          }}
+        >
+          <Pressable
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              width: "100%",
+            }}
+            onPress={() => handleClose()}
+            onPressIn={() => handlePressIn()}
+            onPressOut={() => handlePressOut()}
+          >
+            <Animated.View
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "rgba(75, 75, 75, 1)",
+                paddingVertical: 8,
+                width: "25%",
+                borderRadius: 10,
+                overflow: "hidden",
+                boxShadow: "inset 2px 2px 2px white, 2px 2px 2px 1px black",
+                transform: [{ scale }],
+              }}
+            >
+              <Text
+                style={{ color: "white", fontWeight: "bold", fontSize: 16 }}
+              >
+                {close[lang]}
+              </Text>
+            </Animated.View>
+          </Pressable>
+        </View>
+      </View>
+    </Animated.View>
+  );
+};
+
+export default BoxCheckOverlay;
+
+const styles = StyleSheet.create({});
 </file>
 
 <file path="components/container.tsx">
@@ -2280,34 +3511,6 @@ const styles = StyleSheet.create({
 });
 </file>
 
-<file path="components/external-link.tsx">
-import { Href, Link } from 'expo-router';
-import { openBrowserAsync, WebBrowserPresentationStyle } from 'expo-web-browser';
-import { type ComponentProps } from 'react';
-
-type Props = Omit<ComponentProps<typeof Link>, 'href'> & { href: Href & string };
-
-export function ExternalLink({ href, ...rest }: Props) {
-  return (
-    <Link
-      target="_blank"
-      {...rest}
-      href={href}
-      onPress={async (event) => {
-        if (process.env.EXPO_OS !== 'web') {
-          // Prevent the default behavior of linking to the default browser on native.
-          event.preventDefault();
-          // Open the link in an in-app browser.
-          await openBrowserAsync(href, {
-            presentationStyle: WebBrowserPresentationStyle.AUTOMATIC,
-          });
-        }
-      }}
-    />
-  );
-}
-</file>
-
 <file path="components/fourStack.tsx">
 // import { useLanguage } from "@/context/LanguageContext";
 // import {
@@ -2708,377 +3911,261 @@ const styles = StyleSheet.create({
 });
 </file>
 
-<file path="components/haptic-tab.tsx">
-import { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
-import { PlatformPressable } from '@react-navigation/elements';
-import * as Haptics from 'expo-haptics';
-
-export function HapticTab(props: BottomTabBarButtonProps) {
-  return (
-    <PlatformPressable
-      {...props}
-      onPressIn={(ev) => {
-        if (process.env.EXPO_OS === 'ios') {
-          // Add a soft haptic feedback when pressing down on the tabs.
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        }
-        props.onPressIn?.(ev);
-      }}
-    />
-  );
-}
-</file>
-
-<file path="components/hello-wave.tsx">
-import Animated from 'react-native-reanimated';
-
-export function HelloWave() {
-  return (
-    <Animated.Text
-      style={{
-        fontSize: 28,
-        lineHeight: 32,
-        marginTop: -6,
-        animationName: {
-          '50%': { transform: [{ rotate: '25deg' }] },
-        },
-        animationIterationCount: 4,
-        animationDuration: '300ms',
-      }}>
-      👋
-    </Animated.Text>
-  );
-}
-</file>
-
-<file path="components/optionsOverlay.tsx">
+<file path="components/header.tsx">
+import { useLanguage } from "@/context/LanguageContext";
 import Feather from "@expo/vector-icons/Feather";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { useFonts } from "expo-font";
 import * as Haptics from "expo-haptics";
-import React, { useEffect, useState } from "react";
-import {
-  Animated,
-  Dimensions,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import React, { useState } from "react";
+import { Dimensions, Pressable, StyleSheet, Text, View } from "react-native";
 
-interface Card {
-  month: string; // e.g., "Jan", "Feb", etc.
-  rank: string;
-  id: string; // optional, unique identifier
-  img: string;
-  rotation: number;
-  title: { en: string; ko: string };
-  meaning: { en: string; ko: string };
+interface Prop {
+  setOpenInfo: (value: boolean) => void;
 }
 
-type Props = {
-  setOpenOptions: (value: boolean) => void;
-  mute: boolean;
-  setMute: (value: boolean) => void;
-  showLabels: boolean;
-  setShowLabels: (value: boolean) => void;
-};
+const language = { en: "ENG", ko: "한국어" };
+const information = { en: "Info", ko: "정보" };
 
-const OptionsOverlay = ({
-  setOpenOptions,
-  mute,
-  setMute,
-  showLabels,
-  setShowLabels,
-}: Props) => {
+const Header = ({ setOpenInfo }: Prop) => {
   const { width: vw } = Dimensions.get("window");
 
-  const [scale] = useState(new Animated.Value(1));
-  const [opacity] = useState(new Animated.Value(0));
+  const { lang, setLang } = useLanguage();
+  const toggleLang = () => setLang(lang === "en" ? "ko" : "en");
 
-  useEffect(() => {
-    Animated.timing(opacity, {
-      toValue: 1,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  }, []);
+  const [fontsLoaded] = useFonts({
+    // Point directly to your local asset
+    "GowunDodum-Regular": require("../assets/fonts/GowunDodum-Regular.ttf"),
+    "Gugi-Regular": require("../assets/fonts/Gugi-Regular.ttf"),
+  });
 
-  const handlePressIn = () => {
-    Haptics.selectionAsync();
-    Animated.spring(scale, {
-      toValue: 0.75,
-      useNativeDriver: true,
-    }).start();
-  };
+  const date = new Date().toLocaleDateString();
+  const dayNum = new Date().getDay();
+  const days = [
+    { en: "Sun", ko: "일요일" },
+    { en: "Mon", ko: "월요일" },
+    { en: "Tue", ko: "화요일" },
+    { en: "Wed", ko: "수요일" },
+    { en: "Thu", ko: "목요일" },
+    { en: "Fri", ko: "금요일" },
+    { en: "Sat", ko: "토요일" },
+  ];
 
-  const handlePressOut = () => {
-    Animated.spring(scale, {
-      toValue: 1,
-      friction: 3,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const handleClose = () => {
-    Animated.timing(opacity, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => setOpenOptions(false));
-  };
-
-  const [sound, setSound] = useState(true);
-  const [labels, setLabels] = useState(true);
+  const [english, setEnglish] = useState(true);
+  const [info, setInfo] = useState(true);
 
   return (
-    <Animated.View
-      style={{
-        position: "absolute",
-        width: "100%",
-        height: "100%",
-        zIndex: 20,
-        backgroundColor: "rgba(255, 255, 255, 0.25)",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        opacity,
-      }}
-    >
+    <View style={styles.header}>
       <View
         style={{
-          backgroundColor: "rgba(255, 217, 0, 1)",
-          borderRadius: 10,
-          overflow: "hidden",
-          padding: 10,
-          width: "90%",
-          height: "30%",
+          height: "100%",
           display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          alignItems: "center",
-          boxShadow: "inset 2px 2px 2px white, 2px 2px 2px 1px black",
+          flex: 1,
+          justifyContent: "center",
         }}
       >
+        <Pressable
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            alignSelf: "flex-start",
+            height: "100%",
+            width: 50,
+            gap: 4,
+          }}
+          onPressIn={() => {
+            Haptics.selectionAsync();
+            setEnglish(false);
+          }}
+          onPressOut={() => {
+            setEnglish(true);
+            toggleLang();
+          }}
+        >
+          <Ionicons
+            name="globe-outline"
+            size={vw * 0.07}
+            color={english ? "white" : "rgba(255,255,255,0.5)"}
+            allowFontScaling={false}
+          />
+          <Text
+            style={{
+              color: english ? "white" : "rgba(255,255,255,0.5)",
+              fontSize: vw * 0.035,
+              fontFamily: "GowunDodum-Regular",
+              width: "100%",
+              textAlign: "center",
+            }}
+            allowFontScaling={false}
+          >
+            {language[lang]}
+          </Text>
+        </Pressable>
+      </View>
+      <View
+        style={{
+          display: "flex",
+          flex: 3,
+          flexDirection: "column",
+          flexWrap: "nowrap",
+          alignItems: "center",
+          height: "100%",
+          justifyContent: "center",
+          gap: 0,
+        }}
+      >
+        {/* <View
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            flexWrap: "nowrap",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 1,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: vw * 0.04,
+              color: "rgba(255, 255, 255, 1)",
+              fontFamily: "GowunDodum-Regular",
+            }}
+            allowFontScaling={false}
+          >
+            {lang === "en" ? "화투점" : "Hwatu Tarot"}
+          </Text>
+          <Text
+            style={{
+              fontSize: vw * 0.07,
+              color: "rgba(255, 217, 0, 1)",
+              fontFamily: "GowunDodum-Regular",
+            }}
+            allowFontScaling={false}
+          >
+            {lang === "en" ? "Hwatu Tarot" : "화투점"}
+          </Text>
+        </View> */}
         <View
           style={{
-            width: "100%",
             display: "flex",
             flexDirection: "row",
             flexWrap: "nowrap",
-            justifyContent: "space-evenly",
             alignItems: "center",
-            height: "70%",
-            paddingVertical: 5,
-            borderRadius: 8,
-            overflow: "hidden",
+            justifyContent: "center",
+            width: "100%",
+            height: "100%",
           }}
         >
-          <Pressable
-            style={{ width: "30%" }}
-            onPressIn={() => {
-              Haptics.selectionAsync();
-              setSound(false);
-            }}
-            onPressOut={() => {
-              setSound(true);
-              setMute(!mute);
-            }}
-          >
-            {!mute ? (
-              <View
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  gap: 10,
-                }}
-              >
-                <Feather
-                  name="volume-2"
-                  size={60}
-                  color={sound ? "black" : "red"}
-                />
-                <Text style={{ color: sound ? "black" : "red" }}>Sound ON</Text>
-              </View>
-            ) : (
-              <View
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  gap: 10,
-                }}
-              >
-                <Feather
-                  name="volume-x"
-                  size={60}
-                  color={sound ? "black" : "red"}
-                />
-                <Text style={{ color: sound ? "black" : "red" }}>
-                  Sound OFF
-                </Text>
-              </View>
-            )}
-          </Pressable>
-          <Pressable
-            style={{ width: "30%" }}
-            onPressIn={() => {
-              Haptics.selectionAsync();
-              setLabels(false);
-            }}
-            onPressOut={() => {
-              setLabels(true);
-              setShowLabels(!showLabels);
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              flexWrap: "nowrap",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100%",
+              height: "100%",
+              gap: 10,
             }}
           >
-            {showLabels ? (
-              <View
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  gap: 10,
-                }}
-              >
-                <MaterialCommunityIcons
-                  name="label-outline"
-                  size={60}
-                  color={labels ? "black" : "red"}
-                />
-                <Text style={{ color: labels ? "black" : "red" }}>
-                  Labels ON
-                </Text>
-              </View>
-            ) : (
-              <View
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  gap: 10,
-                }}
-              >
-                <MaterialCommunityIcons
-                  name="label-off-outline"
-                  size={60}
-                  color={labels ? "black" : "red"}
-                />
-                <Text style={{ color: labels ? "black" : "red" }}>
-                  Labels OFF
-                </Text>
-              </View>
-            )}
-          </Pressable>
-        </View>
-        <View style={{ height: "30%" }}>
-          <Pressable
-            onPress={() => handleClose()}
-            onPressIn={() => handlePressIn()}
-            onPressOut={() => handlePressOut()}
-          >
-            <Animated.View
+            <Text
               style={{
-                backgroundColor: "rgba(224, 0, 0, 1)",
-                paddingVertical: 10,
-                paddingHorizontal: 20,
-                borderRadius: 10,
-                overflow: "hidden",
-                boxShadow: "inset 2px 2px 2px white, 2px 2px 2px 1px black",
-                transform: [{ scale }],
+                fontSize: vw * 0.06,
+                height: "100%",
+                color: "rgb(255, 217, 0)",
+                fontFamily: "Gugi-Regular",
+                textAlign: "center",
+                textAlignVertical: "center",
+                flexShrink: 0,
+                includeFontPadding: false,
+                minWidth: vw * 0.12,
               }}
+              allowFontScaling={false}
+              numberOfLines={1}
             >
-              <Text style={{ color: "white", fontWeight: "bold" }}>Close</Text>
-            </Animated.View>
-          </Pressable>
+              {days[dayNum][lang]}
+            </Text>
+            <Text
+              style={{
+                fontSize: vw * 0.06,
+                height: "100%",
+                color: "rgb(255, 217, 0)",
+                fontFamily: "Gugi-Regular",
+                textAlign: "center",
+                textAlignVertical: "center",
+              }}
+              allowFontScaling={false}
+            >
+              {date}
+            </Text>
+          </View>
         </View>
       </View>
-    </Animated.View>
+      <View
+        style={{
+          height: "100%",
+          display: "flex",
+          flex: 1,
+          justifyContent: "center",
+        }}
+      >
+        <Pressable
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            alignSelf: "flex-end",
+            height: "100%",
+            width: 50,
+            gap: 4,
+          }}
+          onPressIn={() => {
+            Haptics.selectionAsync();
+            setInfo(false);
+          }}
+          onPressOut={() => {
+            setInfo(true);
+            setOpenInfo(true);
+          }}
+        >
+          <Feather
+            name="info"
+            size={vw * 0.07}
+            color={info ? "white" : "rgba(255,255,255,0.5)"}
+            allowFontScaling={false}
+          />
+          <Text
+            style={{
+              color: info ? "white" : "rgba(255,255,255,0.5)",
+              fontSize: vw * 0.035,
+              fontFamily: "GowunDodum-Regular",
+              width: "100%",
+              textAlign: "center",
+            }}
+            allowFontScaling={false}
+          >
+            {information[lang]}
+          </Text>
+        </Pressable>
+      </View>
+    </View>
   );
 };
 
-export default OptionsOverlay;
-
-const styles = StyleSheet.create({});
-</file>
-
-<file path="components/parallax-scroll-view.tsx">
-import type { PropsWithChildren, ReactElement } from 'react';
-import { StyleSheet } from 'react-native';
-import Animated, {
-  interpolate,
-  useAnimatedRef,
-  useAnimatedStyle,
-  useScrollOffset,
-} from 'react-native-reanimated';
-
-import { ThemedView } from '@/components/themed-view';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useThemeColor } from '@/hooks/use-theme-color';
-
-const HEADER_HEIGHT = 250;
-
-type Props = PropsWithChildren<{
-  headerImage: ReactElement;
-  headerBackgroundColor: { dark: string; light: string };
-}>;
-
-export default function ParallaxScrollView({
-  children,
-  headerImage,
-  headerBackgroundColor,
-}: Props) {
-  const backgroundColor = useThemeColor({}, 'background');
-  const colorScheme = useColorScheme() ?? 'light';
-  const scrollRef = useAnimatedRef<Animated.ScrollView>();
-  const scrollOffset = useScrollOffset(scrollRef);
-  const headerAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [
-        {
-          translateY: interpolate(
-            scrollOffset.value,
-            [-HEADER_HEIGHT, 0, HEADER_HEIGHT],
-            [-HEADER_HEIGHT / 2, 0, HEADER_HEIGHT * 0.75]
-          ),
-        },
-        {
-          scale: interpolate(scrollOffset.value, [-HEADER_HEIGHT, 0, HEADER_HEIGHT], [2, 1, 1]),
-        },
-      ],
-    };
-  });
-
-  return (
-    <Animated.ScrollView
-      ref={scrollRef}
-      style={{ backgroundColor, flex: 1 }}
-      scrollEventThrottle={16}>
-      <Animated.View
-        style={[
-          styles.header,
-          { backgroundColor: headerBackgroundColor[colorScheme] },
-          headerAnimatedStyle,
-        ]}>
-        {headerImage}
-      </Animated.View>
-      <ThemedView style={styles.content}>{children}</ThemedView>
-    </Animated.ScrollView>
-  );
-}
+export default Header;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   header: {
-    height: HEADER_HEIGHT,
-    overflow: 'hidden',
-  },
-  content: {
-    flex: 1,
-    padding: 32,
-    gap: 16,
-    overflow: 'hidden',
+    width: "100%",
+    height: "7%",
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    alignItems: "center",
+    paddingHorizontal: 20,
   },
 });
 </file>
@@ -3809,508 +4896,86 @@ export default ResultsOverlay;
 const styles = StyleSheet.create({});
 </file>
 
-<file path="components/themed-text.tsx">
-import { StyleSheet, Text, type TextProps } from 'react-native';
-
-import { useThemeColor } from '@/hooks/use-theme-color';
-
-export type ThemedTextProps = TextProps & {
-  lightColor?: string;
-  darkColor?: string;
-  type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link';
-};
-
-export function ThemedText({
-  style,
-  lightColor,
-  darkColor,
-  type = 'default',
-  ...rest
-}: ThemedTextProps) {
-  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
-
-  return (
-    <Text
-      style={[
-        { color },
-        type === 'default' ? styles.default : undefined,
-        type === 'title' ? styles.title : undefined,
-        type === 'defaultSemiBold' ? styles.defaultSemiBold : undefined,
-        type === 'subtitle' ? styles.subtitle : undefined,
-        type === 'link' ? styles.link : undefined,
-        style,
-      ]}
-      {...rest}
-    />
-  );
-}
-
-const styles = StyleSheet.create({
-  default: {
-    fontSize: 16,
-    lineHeight: 24,
-  },
-  defaultSemiBold: {
-    fontSize: 16,
-    lineHeight: 24,
-    fontWeight: '600',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    lineHeight: 32,
-  },
-  subtitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  link: {
-    lineHeight: 30,
-    fontSize: 16,
-    color: '#0a7ea4',
-  },
-});
-</file>
-
-<file path="components/themed-view.tsx">
-import { View, type ViewProps } from 'react-native';
-
-import { useThemeColor } from '@/hooks/use-theme-color';
-
-export type ThemedViewProps = ViewProps & {
-  lightColor?: string;
-  darkColor?: string;
-};
-
-export function ThemedView({ style, lightColor, darkColor, ...otherProps }: ThemedViewProps) {
-  const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
-
-  return <View style={[{ backgroundColor }, style]} {...otherProps} />;
-}
-</file>
-
-<file path="components/ui/collapsible.tsx">
-import { PropsWithChildren, useState } from 'react';
-import { StyleSheet, TouchableOpacity } from 'react-native';
-
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export function Collapsible({ children, title }: PropsWithChildren & { title: string }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const theme = useColorScheme() ?? 'light';
-
-  return (
-    <ThemedView>
-      <TouchableOpacity
-        style={styles.heading}
-        onPress={() => setIsOpen((value) => !value)}
-        activeOpacity={0.8}>
-        <IconSymbol
-          name="chevron.right"
-          size={18}
-          weight="medium"
-          color={theme === 'light' ? Colors.light.icon : Colors.dark.icon}
-          style={{ transform: [{ rotate: isOpen ? '90deg' : '0deg' }] }}
-        />
-
-        <ThemedText type="defaultSemiBold">{title}</ThemedText>
-      </TouchableOpacity>
-      {isOpen && <ThemedView style={styles.content}>{children}</ThemedView>}
-    </ThemedView>
-  );
-}
-
-const styles = StyleSheet.create({
-  heading: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  content: {
-    marginTop: 6,
-    marginLeft: 24,
-  },
-});
-</file>
-
-<file path="components/ui/icon-symbol.ios.tsx">
-import { SymbolView, SymbolViewProps, SymbolWeight } from 'expo-symbols';
-import { StyleProp, ViewStyle } from 'react-native';
-
-export function IconSymbol({
-  name,
-  size = 24,
-  color,
-  style,
-  weight = 'regular',
-}: {
-  name: SymbolViewProps['name'];
-  size?: number;
-  color: string;
-  style?: StyleProp<ViewStyle>;
-  weight?: SymbolWeight;
-}) {
-  return (
-    <SymbolView
-      weight={weight}
-      tintColor={color}
-      resizeMode="scaleAspectFit"
-      name={name}
-      style={[
-        {
-          width: size,
-          height: size,
-        },
-        style,
-      ]}
-    />
-  );
-}
-</file>
-
-<file path="components/ui/icon-symbol.tsx">
-// Fallback for using MaterialIcons on Android and web.
-
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { SymbolWeight, SymbolViewProps } from 'expo-symbols';
-import { ComponentProps } from 'react';
-import { OpaqueColorValue, type StyleProp, type TextStyle } from 'react-native';
-
-type IconMapping = Record<SymbolViewProps['name'], ComponentProps<typeof MaterialIcons>['name']>;
-type IconSymbolName = keyof typeof MAPPING;
-
-/**
- * Add your SF Symbols to Material Icons mappings here.
- * - see Material Icons in the [Icons Directory](https://icons.expo.fyi).
- * - see SF Symbols in the [SF Symbols](https://developer.apple.com/sf-symbols/) app.
- */
-const MAPPING = {
-  'house.fill': 'home',
-  'paperplane.fill': 'send',
-  'chevron.left.forwardslash.chevron.right': 'code',
-  'chevron.right': 'chevron-right',
-} as IconMapping;
-
-/**
- * An icon component that uses native SF Symbols on iOS, and Material Icons on Android and web.
- * This ensures a consistent look across platforms, and optimal resource usage.
- * Icon `name`s are based on SF Symbols and require manual mapping to Material Icons.
- */
-export function IconSymbol({
-  name,
-  size = 24,
-  color,
-  style,
-}: {
-  name: IconSymbolName;
-  size?: number;
-  color: string | OpaqueColorValue;
-  style?: StyleProp<TextStyle>;
-  weight?: SymbolWeight;
-}) {
-  return <MaterialIcons color={color} size={size} name={MAPPING[name]} style={style} />;
-}
-</file>
-
-<file path="constants/theme.ts">
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
-import { Platform } from 'react-native';
-
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
-
-export const Colors = {
-  light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
-  },
-  dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
-  },
-};
-
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
-  },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
-  },
-  web: {
-    sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-    serif: "Georgia, 'Times New Roman', serif",
-    rounded: "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
-    mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
-  },
-});
-</file>
-
-<file path="context/LanguageContext.tsx">
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { createContext, useContext, useEffect, useState } from "react";
-
-export type Lang = "en" | "ko";
-
-const LanguageContext = createContext<{
-  lang: Lang;
-  setLang: (lang: Lang) => void;
-}>({
-  lang: "en",
-  setLang: () => {},
-});
-
-export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
-  const [lang, setLang] = useState<Lang>("en");
-
-  useEffect(() => {
-    // Load saved language on mount
-    AsyncStorage.getItem("appLanguage").then((savedLang) => {
-      if (savedLang === "en" || savedLang === "ko") {
-        setLang(savedLang);
-      }
-    });
-  }, []);
-
-  const updateLang = (newLang: Lang) => {
-    setLang(newLang);
-    AsyncStorage.setItem("appLanguage", newLang); // Save to storage
-  };
-
-  return (
-    <LanguageContext.Provider value={{ lang, setLang: updateLang }}>
-      {children}
-    </LanguageContext.Provider>
-  );
-};
-
-export const useLanguage = () => useContext(LanguageContext);
-</file>
-
-<file path="eslint.config.js">
-// https://docs.expo.dev/guides/using-eslint/
-const { defineConfig } = require('eslint/config');
-const expoConfig = require('eslint-config-expo/flat');
-
-module.exports = defineConfig([
-  expoConfig,
-  {
-    ignores: ['dist/*'],
-  },
-]);
-</file>
-
-<file path="hooks/use-color-scheme.ts">
-export { useColorScheme } from 'react-native';
-</file>
-
-<file path="hooks/use-color-scheme.web.ts">
-import { useEffect, useState } from 'react';
-import { useColorScheme as useRNColorScheme } from 'react-native';
-
-/**
- * To support static rendering, this value needs to be re-calculated on the client side for web
- */
-export function useColorScheme() {
-  const [hasHydrated, setHasHydrated] = useState(false);
-
-  useEffect(() => {
-    setHasHydrated(true);
-  }, []);
-
-  const colorScheme = useRNColorScheme();
-
-  if (hasHydrated) {
-    return colorScheme;
-  }
-
-  return 'light';
-}
-</file>
-
-<file path="hooks/use-theme-color.ts">
-/**
- * Learn more about light and dark modes:
- * https://docs.expo.dev/guides/color-schemes/
- */
-
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export function useThemeColor(
-  props: { light?: string; dark?: string },
-  colorName: keyof typeof Colors.light & keyof typeof Colors.dark
-) {
-  const theme = useColorScheme() ?? 'light';
-  const colorFromProps = props[theme];
-
-  if (colorFromProps) {
-    return colorFromProps;
-  } else {
-    return Colors[theme][colorName];
-  }
-}
-</file>
-
-<file path="scripts/reset-project.js">
-#!/usr/bin/env node
-
-/**
- * This script is used to reset the project to a blank state.
- * It deletes or moves the /app, /components, /hooks, /scripts, and /constants directories to /app-example based on user input and creates a new /app directory with an index.tsx and _layout.tsx file.
- * You can remove the `reset-project` script from package.json and safely delete this file after running it.
- */
-
-const fs = require("fs");
-const path = require("path");
-const readline = require("readline");
-
-const root = process.cwd();
-const oldDirs = ["app", "components", "hooks", "constants", "scripts"];
-const exampleDir = "app-example";
-const newAppDir = "app";
-const exampleDirPath = path.join(root, exampleDir);
-
-const indexContent = `import { Text, View } from "react-native";
-
-export default function Index() {
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Edit app/index.tsx to edit this screen.</Text>
-    </View>
-  );
-}
-`;
-
-const layoutContent = `import { Stack } from "expo-router";
-
-export default function RootLayout() {
-  return <Stack />;
-}
-`;
-
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
-
-const moveDirectories = async (userInput) => {
-  try {
-    if (userInput === "y") {
-      // Create the app-example directory
-      await fs.promises.mkdir(exampleDirPath, { recursive: true });
-      console.log(`📁 /${exampleDir} directory created.`);
-    }
-
-    // Move old directories to new app-example directory or delete them
-    for (const dir of oldDirs) {
-      const oldDirPath = path.join(root, dir);
-      if (fs.existsSync(oldDirPath)) {
-        if (userInput === "y") {
-          const newDirPath = path.join(root, exampleDir, dir);
-          await fs.promises.rename(oldDirPath, newDirPath);
-          console.log(`➡️ /${dir} moved to /${exampleDir}/${dir}.`);
-        } else {
-          await fs.promises.rm(oldDirPath, { recursive: true, force: true });
-          console.log(`❌ /${dir} deleted.`);
-        }
-      } else {
-        console.log(`➡️ /${dir} does not exist, skipping.`);
-      }
-    }
-
-    // Create new /app directory
-    const newAppDirPath = path.join(root, newAppDir);
-    await fs.promises.mkdir(newAppDirPath, { recursive: true });
-    console.log("\n📁 New /app directory created.");
-
-    // Create index.tsx
-    const indexPath = path.join(newAppDirPath, "index.tsx");
-    await fs.promises.writeFile(indexPath, indexContent);
-    console.log("📄 app/index.tsx created.");
-
-    // Create _layout.tsx
-    const layoutPath = path.join(newAppDirPath, "_layout.tsx");
-    await fs.promises.writeFile(layoutPath, layoutContent);
-    console.log("📄 app/_layout.tsx created.");
-
-    console.log("\n✅ Project reset complete. Next steps:");
-    console.log(
-      `1. Run \`npx expo start\` to start a development server.\n2. Edit app/index.tsx to edit the main screen.${
-        userInput === "y"
-          ? `\n3. Delete the /${exampleDir} directory when you're done referencing it.`
-          : ""
-      }`
-    );
-  } catch (error) {
-    console.error(`❌ Error during script execution: ${error.message}`);
-  }
-};
-
-rl.question(
-  "Do you want to move existing files to /app-example instead of deleting them? (Y/n): ",
-  (answer) => {
-    const userInput = answer.trim().toLowerCase() || "y";
-    if (userInput === "y" || userInput === "n") {
-      moveDirectories(userInput).finally(() => rl.close());
-    } else {
-      console.log("❌ Invalid input. Please enter 'Y' or 'N'.");
-      rl.close();
-    }
-  }
-);
-</file>
-
-<file path="tsconfig.json">
+<file path="eas.json">
 {
-  "extends": "expo/tsconfig.base",
-  "compilerOptions": {
-    "strict": true,
-    "paths": {
-      "@/*": [
-        "./*"
-      ]
+  "cli": {
+    "version": ">= 19.0.8",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "autoIncrement": true
     }
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    ".expo/types/**/*.ts",
-    "expo-env.d.ts"
-  ]
+  "submit": {
+    "production": {}
+  }
 }
+</file>
+
+<file path="README.md">
+# Welcome to your Expo app 👋
+
+This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+
+## Get started
+
+1. Install dependencies
+
+   ```bash
+   npm install
+   ```
+
+2. Start the app
+
+   ```bash
+   npx expo start
+   ```
+
+In the output, you'll find options to open the app in a
+
+- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
+- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
+- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
+- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+
+You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+
+## Get a fresh project
+
+When you're ready, run:
+
+```bash
+npm run reset-project
+```
+
+This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+
+## Learn more
+
+To learn more about developing your project with Expo, look at the following resources:
+
+- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
+- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+
+## Join the community
+
+Join our community of developers creating universal apps.
+
+- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
+- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+#   h w a t u - t a r o t - r e a c t - n a t i v e - v 2  
+ 
 </file>
 
 <file path="app/_layout.tsx">
@@ -4338,121 +5003,6 @@ export default function RootLayout() {
     </SafeAreaProvider>
   );
 }
-</file>
-
-<file path="app/(tabs)/explore.tsx">
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Collapsible } from '@/components/ui/collapsible';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
-
-export default function TabTwoScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Explore
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful{' '}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
-  );
-}
-
-const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-});
 </file>
 
 <file path="app/index.tsx">
@@ -5578,500 +6128,6 @@ const styles = StyleSheet.create({
     flexWrap: "nowrap",
     justifyContent: "space-evenly",
     marginVertical: 2,
-  },
-});
-</file>
-
-<file path="app/modal.tsx">
-import { StyleSheet, Text, View } from 'react-native';
-
-
-export default function ModalScreen() {
-  return (
-    <View style={styles.container}>
-      <Text>This is a modal</Text>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  link: {
-    marginTop: 15,
-    paddingVertical: 15,
-  },
-});
-</file>
-
-<file path="components/boxCheckOverlay.tsx">
-import { useLanguage } from "@/context/LanguageContext";
-
-import * as Haptics from "expo-haptics";
-import React, { useEffect, useState } from "react";
-import {
-  Animated,
-  Dimensions,
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-
-interface Card {
-  month: string; // e.g., "Jan", "Feb", etc.
-  rank: string;
-  id: string; // optional, unique identifier
-  img: string;
-  rotation: number;
-  title: { en: string; ko: string };
-  meaning: { en: string; ko: string };
-}
-
-type Props = {
-  setOpenCheckBox: (value: boolean) => void;
-  selectedBox: Card[];
-  imageSet: Record<string, any>;
-};
-
-const close = { en: "Close", ko: "닫기" };
-
-const BoxCheckOverlay = ({ setOpenCheckBox, selectedBox, imageSet }: Props) => {
-  const { width: vw } = Dimensions.get("window");
-
-  const { lang } = useLanguage();
-
-  const [scale] = useState(new Animated.Value(1));
-  const [opacity] = useState(new Animated.Value(0));
-
-  useEffect(() => {
-    Animated.timing(opacity, {
-      toValue: 1,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  }, []);
-
-  const handlePressIn = () => {
-    Haptics.selectionAsync();
-    Animated.spring(scale, {
-      toValue: 0.75,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const handlePressOut = () => {
-    Animated.spring(scale, {
-      toValue: 1,
-      friction: 3,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const handleClose = () => {
-    Animated.timing(opacity, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => setOpenCheckBox(false));
-  };
-
-  const monthCounts = selectedBox.reduce(
-    (acc, card) => {
-      acc[card.month] = (acc[card.month] || 0) + 1;
-      return acc;
-    },
-    {} as Record<string, number>,
-  );
-
-  return (
-    <Animated.View
-      style={{
-        position: "absolute",
-        width: "100%",
-        height: "100%",
-        zIndex: 20,
-        backgroundColor: "rgba(255, 255, 255, 0.3)",
-        opacity,
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <View
-        style={{
-          backgroundColor: "rgba(235, 235, 235, 0.8)",
-          borderRadius: 15,
-          overflow: "hidden",
-          padding: 10,
-          width: "90%",
-          height: "30%",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          alignItems: "center",
-          boxShadow: "inset 1px 2px 3px 3px white, 1px 3px 3px 2px black",
-        }}
-      >
-        <View
-          style={{
-            width: "100%",
-            display: "flex",
-            flexDirection: "row",
-            flexWrap: "wrap",
-            justifyContent: "center",
-            alignContent: "center",
-            height: "80%",
-            gap: 6,
-            backgroundColor: "rgba(235, 235, 235, 0.8)",
-            boxShadow: "inset 1px 1px 4px black",
-            paddingVertical: 5,
-            borderRadius: 10,
-            overflow: "hidden",
-            paddingHorizontal: 12,
-          }}
-        >
-          {selectedBox.length > 0 &&
-            selectedBox.map((card, i) => {
-              const hasFour = monthCounts[card.month] === 4;
-              return (
-                <View
-                  style={{
-                    width: vw * 0.11,
-                    aspectRatio: 230 / 360,
-                    borderRadius: 2,
-                    overflow: "hidden",
-                    // transform: [{ rotate: `${card.rotation}deg` }],
-                    borderColor: hasFour ? "rgba(255, 217, 0, 1)" : "indianred",
-                    borderWidth: hasFour ? 2 : 1,
-                    boxShadow: hasFour
-                      ? "0px 0px 0px 2px rgba(0, 0, 0, 1)"
-                      : "2px 2px 2px black",
-                  }}
-                  key={i}
-                >
-                  <Image
-                    key={card.id}
-                    source={imageSet[card.img]}
-                    style={{ width: "100%", height: "100%" }}
-                    resizeMode="stretch"
-                  />
-                </View>
-              );
-            })}
-        </View>
-
-        <View
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            width: "100%",
-          }}
-        >
-          <Pressable
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              width: "100%",
-            }}
-            onPress={() => handleClose()}
-            onPressIn={() => handlePressIn()}
-            onPressOut={() => handlePressOut()}
-          >
-            <Animated.View
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: "rgba(75, 75, 75, 1)",
-                paddingVertical: 8,
-                width: "25%",
-                borderRadius: 10,
-                overflow: "hidden",
-                boxShadow: "inset 2px 2px 2px white, 2px 2px 2px 1px black",
-                transform: [{ scale }],
-              }}
-            >
-              <Text
-                style={{ color: "white", fontWeight: "bold", fontSize: 16 }}
-              >
-                {close[lang]}
-              </Text>
-            </Animated.View>
-          </Pressable>
-        </View>
-      </View>
-    </Animated.View>
-  );
-};
-
-export default BoxCheckOverlay;
-
-const styles = StyleSheet.create({});
-</file>
-
-<file path="components/header.tsx">
-import { useLanguage } from "@/context/LanguageContext";
-import Feather from "@expo/vector-icons/Feather";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { useFonts } from "expo-font";
-import * as Haptics from "expo-haptics";
-import React, { useState } from "react";
-import { Dimensions, Pressable, StyleSheet, Text, View } from "react-native";
-
-interface Prop {
-  setOpenInfo: (value: boolean) => void;
-}
-
-const language = { en: "ENG", ko: "한국어" };
-const information = { en: "Info", ko: "정보" };
-
-const Header = ({ setOpenInfo }: Prop) => {
-  const { width: vw } = Dimensions.get("window");
-
-  const { lang, setLang } = useLanguage();
-  const toggleLang = () => setLang(lang === "en" ? "ko" : "en");
-
-  const [fontsLoaded] = useFonts({
-    // Point directly to your local asset
-    "GowunDodum-Regular": require("../assets/fonts/GowunDodum-Regular.ttf"),
-    "Gugi-Regular": require("../assets/fonts/Gugi-Regular.ttf"),
-  });
-
-  const date = new Date().toLocaleDateString();
-  const dayNum = new Date().getDay();
-  const days = [
-    { en: "Sun", ko: "일요일" },
-    { en: "Mon", ko: "월요일" },
-    { en: "Tue", ko: "화요일" },
-    { en: "Wed", ko: "수요일" },
-    { en: "Thu", ko: "목요일" },
-    { en: "Fri", ko: "금요일" },
-    { en: "Sat", ko: "토요일" },
-  ];
-
-  const [english, setEnglish] = useState(true);
-  const [info, setInfo] = useState(true);
-
-  return (
-    <View style={styles.header}>
-      <View
-        style={{
-          height: "100%",
-          display: "flex",
-          flex: 1,
-          justifyContent: "center",
-        }}
-      >
-        <Pressable
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            alignSelf: "flex-start",
-            height: "100%",
-            width: 50,
-            gap: 4,
-          }}
-          onPressIn={() => {
-            Haptics.selectionAsync();
-            setEnglish(false);
-          }}
-          onPressOut={() => {
-            setEnglish(true);
-            toggleLang();
-          }}
-        >
-          <Ionicons
-            name="globe-outline"
-            size={vw * 0.07}
-            color={english ? "white" : "rgba(255,255,255,0.5)"}
-            allowFontScaling={false}
-          />
-          <Text
-            style={{
-              color: english ? "white" : "rgba(255,255,255,0.5)",
-              fontSize: vw * 0.035,
-              fontFamily: "GowunDodum-Regular",
-              width: "100%",
-              textAlign: "center",
-            }}
-            allowFontScaling={false}
-          >
-            {language[lang]}
-          </Text>
-        </Pressable>
-      </View>
-      <View
-        style={{
-          display: "flex",
-          flex: 3,
-          flexDirection: "column",
-          flexWrap: "nowrap",
-          alignItems: "center",
-          height: "100%",
-          justifyContent: "center",
-          gap: 0,
-        }}
-      >
-        {/* <View
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            flexWrap: "nowrap",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 1,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: vw * 0.04,
-              color: "rgba(255, 255, 255, 1)",
-              fontFamily: "GowunDodum-Regular",
-            }}
-            allowFontScaling={false}
-          >
-            {lang === "en" ? "화투점" : "Hwatu Tarot"}
-          </Text>
-          <Text
-            style={{
-              fontSize: vw * 0.07,
-              color: "rgba(255, 217, 0, 1)",
-              fontFamily: "GowunDodum-Regular",
-            }}
-            allowFontScaling={false}
-          >
-            {lang === "en" ? "Hwatu Tarot" : "화투점"}
-          </Text>
-        </View> */}
-        <View
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            flexWrap: "nowrap",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "100%",
-            height: "100%",
-          }}
-        >
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              flexWrap: "nowrap",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "100%",
-              height: "100%",
-              gap: 10,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: vw * 0.06,
-                height: "100%",
-                color: "rgb(255, 217, 0)",
-                fontFamily: "Gugi-Regular",
-                textAlign: "center",
-                textAlignVertical: "center",
-                flexShrink: 0,
-                includeFontPadding: false,
-                minWidth: vw * 0.12,
-              }}
-              allowFontScaling={false}
-              numberOfLines={1}
-            >
-              {days[dayNum][lang]}
-            </Text>
-            <Text
-              style={{
-                fontSize: vw * 0.06,
-                height: "100%",
-                color: "rgb(255, 217, 0)",
-                fontFamily: "Gugi-Regular",
-                textAlign: "center",
-                textAlignVertical: "center",
-              }}
-              allowFontScaling={false}
-            >
-              {date}
-            </Text>
-          </View>
-        </View>
-      </View>
-      <View
-        style={{
-          height: "100%",
-          display: "flex",
-          flex: 1,
-          justifyContent: "center",
-        }}
-      >
-        <Pressable
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            alignSelf: "flex-end",
-            height: "100%",
-            width: 50,
-            gap: 4,
-          }}
-          onPressIn={() => {
-            Haptics.selectionAsync();
-            setInfo(false);
-          }}
-          onPressOut={() => {
-            setInfo(true);
-            setOpenInfo(true);
-          }}
-        >
-          <Feather
-            name="info"
-            size={vw * 0.07}
-            color={info ? "white" : "rgba(255,255,255,0.5)"}
-            allowFontScaling={false}
-          />
-          <Text
-            style={{
-              color: info ? "white" : "rgba(255,255,255,0.5)",
-              fontSize: vw * 0.035,
-              fontFamily: "GowunDodum-Regular",
-              width: "100%",
-              textAlign: "center",
-            }}
-            allowFontScaling={false}
-          >
-            {information[lang]}
-          </Text>
-        </Pressable>
-      </View>
-    </View>
-  );
-};
-
-export default Header;
-
-const styles = StyleSheet.create({
-  header: {
-    width: "100%",
-    height: "7%",
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-evenly",
-    alignItems: "center",
-    paddingHorizontal: 20,
   },
 });
 </file>
@@ -7722,116 +7778,6 @@ const styles = StyleSheet.create({
 });
 </file>
 
-<file path="package.json">
-{
-  "name": "hwatu-tarot-v2",
-  "main": "expo-router/entry",
-  "version": "1.0.0",
-  "scripts": {
-    "start": "expo start",
-    "reset-project": "node ./scripts/reset-project.js",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
-    "web": "expo start --web",
-    "lint": "expo lint"
-  },
-  "dependencies": {
-    "@expo-google-fonts/jua": "^0.4.1",
-    "@expo/vector-icons": "^15.0.3",
-    "@react-native-async-storage/async-storage": "2.2.0",
-    "@react-navigation/bottom-tabs": "^7.4.0",
-    "@react-navigation/elements": "^2.6.3",
-    "@react-navigation/native": "^7.1.8",
-    "expo": "~54.0.33",
-    "expo-audio": "~1.1.1",
-    "expo-constants": "~18.0.13",
-    "expo-font": "~14.0.11",
-    "expo-haptics": "~15.0.8",
-    "expo-image": "~3.0.11",
-    "expo-linking": "~8.0.11",
-    "expo-router": "~6.0.23",
-    "expo-splash-screen": "~31.0.13",
-    "expo-status-bar": "~3.0.9",
-    "expo-symbols": "~1.0.8",
-    "expo-system-ui": "~6.0.9",
-    "expo-web-browser": "~15.0.10",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "react-native": "0.81.5",
-    "react-native-gesture-handler": "~2.28.0",
-    "react-native-reanimated": "~4.1.1",
-    "react-native-safe-area-context": "~5.6.0",
-    "react-native-screens": "~4.16.0",
-    "react-native-shadow-2": "^7.1.2",
-    "react-native-svg": "15.12.1",
-    "react-native-web": "~0.21.0",
-    "react-native-worklets": "0.5.1"
-  },
-  "devDependencies": {
-    "@types/react": "~19.1.0",
-    "eslint": "^9.25.0",
-    "eslint-config-expo": "~10.0.0",
-    "typescript": "~5.9.2"
-  },
-  "private": true
-}
-</file>
-
-<file path="README.md">
-# Welcome to your Expo app 👋
-
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
-
-## Get started
-
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
-#   h w a t u - t a r o t - r e a c t - n a t i v e - v 2  
- 
-</file>
-
 <file path="app.json">
 {
   "expo": {
@@ -7849,11 +7795,15 @@ Join our community of developers creating universal apps.
     "android": {
       "icon": "./assets/icon2.png",
       "adaptiveIcon": {
-  "foregroundImage": "./assets/icon1.png",
-  "backgroundColor": "#1b3320"
-},
+        "foregroundImage": "./assets/icon1.png",
+        "backgroundColor": "#1b3320"
+      },
       "predictiveBackGestureEnabled": false,
-      "package": "com.junlee0325.hwatutarotv2"
+      "package": "com.junlee0325.hwatutarotv2",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "web": {
       "output": "static",
@@ -7877,8 +7827,71 @@ Join our community of developers creating universal apps.
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "70cc5093-74ac-4da7-9dd8-e6b8c3c40f86"
+      }
     }
   }
+}
+</file>
+
+<file path="package.json">
+{
+  "name": "hwatu-tarot-v2",
+  "main": "expo-router/entry",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "expo start",
+    "reset-project": "node ./scripts/reset-project.js",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "lint": "expo lint"
+  },
+  "dependencies": {
+    "@expo-google-fonts/jua": "^0.4.1",
+    "@expo/vector-icons": "^15.0.3",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-navigation/bottom-tabs": "^7.4.0",
+    "@react-navigation/elements": "^2.6.3",
+    "@react-navigation/native": "^7.1.8",
+    "expo": "~54.0.33",
+    "expo-asset": "^56.0.13",
+    "expo-audio": "~1.1.1",
+    "expo-constants": "~18.0.13",
+    "expo-font": "~14.0.11",
+    "expo-haptics": "~15.0.8",
+    "expo-image": "~3.0.11",
+    "expo-linking": "~8.0.11",
+    "expo-router": "~6.0.23",
+    "expo-splash-screen": "~31.0.13",
+    "expo-status-bar": "~3.0.9",
+    "expo-symbols": "~1.0.8",
+    "expo-system-ui": "~6.0.9",
+    "expo-web-browser": "~15.0.10",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-native": "0.81.5",
+    "react-native-gesture-handler": "~2.28.0",
+    "react-native-reanimated": "~4.1.1",
+    "react-native-safe-area-context": "~5.6.0",
+    "react-native-screens": "~4.16.0",
+    "react-native-shadow-2": "^7.1.2",
+    "react-native-svg": "15.12.1",
+    "react-native-web": "~0.21.0",
+    "react-native-worklets": "^0.8.0",
+    "react-native-worklets-core": "^1.6.3"
+  },
+  "devDependencies": {
+    "@types/react": "~19.1.0",
+    "eslint": "^9.25.0",
+    "eslint-config-expo": "~10.0.0",
+    "typescript": "~5.9.2"
+  },
+  "private": true
 }
 </file>
 

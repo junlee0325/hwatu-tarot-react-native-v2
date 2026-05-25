@@ -93,7 +93,7 @@ const Header = ({ setOpenInfo }: Prop) => {
       <View
         style={{
           display: "flex",
-          flex: 3,
+          flex: 4,
           flexDirection: "row",
           flexWrap: "nowrap",
           alignItems: "center",
@@ -104,7 +104,7 @@ const Header = ({ setOpenInfo }: Prop) => {
       >
         <Text
           style={{
-            flex: 1,
+            width: "50%",
             fontSize: vw * 0.06,
             height: "100%",
             color: "rgb(255, 217, 0)",
@@ -120,7 +120,7 @@ const Header = ({ setOpenInfo }: Prop) => {
         </Text>
         <Text
           style={{
-            flex: 1,
+            width: "50%",
             fontSize: vw * 0.06,
             height: "100%",
             color: "rgb(255, 217, 0)",

@@ -3,7 +3,7 @@ import Feather from "@expo/vector-icons/Feather";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useFonts } from "expo-font";
 import * as Haptics from "expo-haptics";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Dimensions, Pressable, StyleSheet, Text, View } from "react-native";
 
 interface Prop {
@@ -158,7 +158,7 @@ const Header = ({ setOpenInfo }: Prop) => {
           >
             <Text
               style={{
-                fontSize: vw * 0.06,
+                fontSize: vw * 0.05,
                 height: "100%",
                 color: "rgb(255, 217, 0)",
                 fontFamily: "Gugi-Regular",
@@ -175,7 +175,7 @@ const Header = ({ setOpenInfo }: Prop) => {
             </Text>
             <Text
               style={{
-                fontSize: vw * 0.06,
+                fontSize: vw * 0.05,
                 height: "100%",
                 color: "rgb(255, 217, 0)",
                 fontFamily: "Gugi-Regular",

@@ -98,20 +98,20 @@ const Header = ({ setOpenInfo }: Prop) => {
           flexWrap: "nowrap",
           alignItems: "center",
           height: "100%",
-          justifyContent: "space-evenly",
+          justifyContent: "center",
+          gap: 15,
         }}
       >
         <Text
           style={{
+            flex: 1,
             fontSize: vw * 0.06,
             height: "100%",
             color: "rgb(255, 217, 0)",
             fontFamily: "Gugi-Regular",
-            textAlign: "center",
+            textAlign: "right",
             textAlignVertical: "center",
-            flexShrink: 0,
             includeFontPadding: false,
-            minWidth: vw * 0.12,
           }}
           allowFontScaling={false}
           numberOfLines={1}
@@ -120,12 +120,14 @@ const Header = ({ setOpenInfo }: Prop) => {
         </Text>
         <Text
           style={{
+            flex: 1,
             fontSize: vw * 0.06,
             height: "100%",
             color: "rgb(255, 217, 0)",
             fontFamily: "Gugi-Regular",
-            textAlign: "center",
+            textAlign: "left",
             textAlignVertical: "center",
+            includeFontPadding: false,
           }}
           allowFontScaling={false}
           numberOfLines={1}

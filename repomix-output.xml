@@ -436,27 +436,6 @@ export function ExternalLink({ href, ...rest }: Props) {
 }
 </file>
 
-<file path="components/haptic-tab.tsx">
-import { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
-import { PlatformPressable } from '@react-navigation/elements';
-import * as Haptics from 'expo-haptics';
-
-export function HapticTab(props: BottomTabBarButtonProps) {
-  return (
-    <PlatformPressable
-      {...props}
-      onPressIn={(ev) => {
-        if (process.env.EXPO_OS === 'ios') {
-          // Add a soft haptic feedback when pressing down on the tabs.
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        }
-        props.onPressIn?.(ev);
-      }}
-    />
-  );
-}
-</file>
-
 <file path="components/hello-wave.tsx">
 import Animated from 'react-native-reanimated';
 
@@ -1323,89 +1302,6 @@ export const Fonts = Platform.select({
 });
 </file>
 
-<file path="context/AudioContext.tsx">
-import { useAudioPlayer } from "expo-audio";
-import React, { createContext, useContext, useEffect, useRef } from "react";
-import { useMute } from "./MuteContext";
-
-interface AudioContextType {
-  playSmack: () => void;
-  playPlastic: () => void;
-  playClick: () => void;
-}
-
-const AudioContext = createContext<AudioContextType>({
-  playSmack: () => {},
-  playPlastic: () => {},
-  playClick: () => {},
-});
-
-export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
-  const { mute } = useMute();
-
-  // --- Smack pool (card matched into box) ---
-  const smack1 = useAudioPlayer(require("../assets/smack.mp3"));
-  const smack2 = useAudioPlayer(require("../assets/smack.mp3"));
-
-  // --- Plastic pool (card selected) ---
-  const plastic1 = useAudioPlayer(require("../assets/plastic.mp3"));
-  const plastic2 = useAudioPlayer(require("../assets/plastic.mp3"));
-
-  // --- Click pool (draw button) ---
-  const click1 = useAudioPlayer(require("../assets/click.mp3"));
-  const click2 = useAudioPlayer(require("../assets/click.mp3"));
-
-  // Ref so playFromPool always sees latest mute value without re-renders
-  const muteRef = useRef(mute);
-  useEffect(() => {
-    muteRef.current = mute;
-  }, [mute]);
-
-  // Set volumes and pre-seek everything to 0 on mount.
-  // Pre-seeking means play() fires instantly with no latency.
-  useEffect(() => {
-    smack1.volume = 0.6;
-    smack2.volume = 0.6;
-    plastic1.volume = 0.1;
-    plastic2.volume = 0.1;
-    click1.volume = 0.5;
-    click2.volume = 0.5;
-
-    [smack1, smack2, plastic1, plastic2, click1, click2].forEach((p) =>
-      p.seekTo(0),
-    );
-  }, []);
-
-  type Player = ReturnType<typeof useAudioPlayer>;
-
-  const playFromPool = (pool: Player[]) => {
-    if (muteRef.current) return;
-    for (let i = 0; i < pool.length; i++) {
-      const p = pool[i];
-      if (!p.playing) {
-        p.play();
-        // Re-seek after a brief delay so it's ready for the next trigger
-        setTimeout(() => p.seekTo(0), 50);
-        return;
-      }
-    }
-    // All players busy — drop the sound rather than queue/delay it
-  };
-
-  const playSmack = () => playFromPool([smack1, smack2]);
-  const playPlastic = () => playFromPool([plastic1, plastic2]);
-  const playClick = () => playFromPool([click1, click2]);
-
-  return (
-    <AudioContext.Provider value={{ playSmack, playPlastic, playClick }}>
-      {children}
-    </AudioContext.Provider>
-  );
-};
-
-export const useAudio = () => useContext(AudioContext);
-</file>
-
 <file path="context/LanguageContext.tsx">
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useContext, useEffect, useState } from "react";
@@ -2258,1916 +2154,43 @@ const styles = StyleSheet.create({
 });
 </file>
 
-<file path="components/controls.tsx">
-// import { useLanguage } from "@/context/LanguageContext";
-// import Entypo from "@expo/vector-icons/Entypo";
-// import Feather from "@expo/vector-icons/Feather";
-// import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-// import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-// import { useAudioPlayer } from "expo-audio";
-// import { useFonts } from "expo-font";
-// import * as Haptics from "expo-haptics";
-// import React, { useEffect, useRef, useState } from "react";
-// import {
-//   Animated,
-//   Dimensions,
-//   Image,
-//   Pressable,
-//   StyleSheet,
-//   Text,
-//   View,
-// } from "react-native";
+<file path="components/haptic-tab.tsx">
+// import { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
+// import { PlatformPressable } from '@react-navigation/elements';
+// import * as Haptics from 'expo-haptics';
 
-// interface Card {
-//   month: string; // e.g., 'Jan', 'Feb', etc.
-//   rank: string;
-//   id: string; // optional, unique identifier
-//   img: string;
-//   rotation: number;
-//   title: { en: string; ko: string };
-//   meaning: { en: string; ko: string };
-// }
-
-// interface Prop {
-//   handleDraw: () => void;
-//   setVisible: (value: boolean) => void;
-//   remaining: Card[];
-//   handleReset: () => void;
-//   first: Card | null;
-//   mute: Boolean;
-//   setMute: (value: boolean) => void;
-//   showLabels: Boolean;
-//   setShowLabels: (value: boolean) => void;
-//   boxFour: Card[];
-//   setOpenResults: (value: boolean) => void;
-//   setOpenInfo: (value: boolean) => void;
-//   setResetOpen: (value: boolean) => void;
-// }
-
-// const audio = { en: "Audio", ko: "음향" };
-// const helper = { en: "Helper", ko: "도우미" };
-// const information = { en: "Info", ko: "정보" };
-// const retry = { en: "Restart", ko: "재시작" };
-// const cycle = { en: "Cycle Deck", ko: "순환" };
-// const result = { en: "Open Result", ko: "결과 열기" };
-// const count = { en: "In Deck", ko: "남은 패" };
-
-// const Controls = ({
-//   handleDraw,
-//   setVisible,
-//   remaining,
-//   handleReset,
-//   first,
-//   mute,
-//   setMute,
-//   showLabels,
-//   setShowLabels,
-//   boxFour,
-//   setOpenResults,
-//   setOpenInfo,
-//   setResetOpen,
-// }: Prop) => {
-//   const { lang } = useLanguage();
-
-//   const [fontsLoaded] = useFonts({
-//     // Point directly to your local asset
-//     "GowunDodum-Regular": require("../assets/fonts/GowunDodum-Regular.ttf"),
-//     "Gugi-Regular": require("../assets/fonts/Gugi-Regular.ttf"),
-//   });
-
-//   // Sounds
-//   //////////////////////
-//   // 🔊 DROP-SAFE SOUND POOLS
-//   //////////////////////
-//   // const plasticPlayers = [
-//   //   useAudioPlayer(require("../assets/plastic.mp3")),
-//   //   // useAudioPlayer(require("../assets/plastic.mp3")),
-//   //   // useAudioPlayer(require("../assets/plastic.mp3")),
-//   //   // useAudioPlayer(require("../assets/plastic.mp3")),
-//   // ];
-
-//   const clickPlayers = [
-//     useAudioPlayer(require("../assets/click.mp3")),
-//     // useAudioPlayer(require("../assets/click.mp3")),
-//     // useAudioPlayer(require("../assets/click.mp3")),
-//     // useAudioPlayer(require("../assets/click.mp3")),
-//   ];
-
-//   useEffect(() => {
-//     // plasticPlayers.forEach((p) => (p.volume = 0.05));
-//     clickPlayers.forEach((p) => {p.volume = 0.5;
-//     p.seekTo(0); });
-//   }, []);
-
-//   // const playPlastic = () => {
-//   //   for (let i = 0; i < plasticPlayers.length; i++) {
-//   //     const p = plasticPlayers[i];
-//   //     if (!p.playing) {
-//   //       p.seekTo(0);
-//   //       p.play();
-//   //       return;
-//   //     }
-//   //   }
-
-//   //   // setTimeout(() => {
-//   //   //   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-//   //   // }, 200);
-//   // };
-
-//   const playClick = () => {
-//     for (let i = 0; i < clickPlayers.length; i++) {
-//       const p = clickPlayers[i];
-//       if (!p.playing) {
-//         p.seekTo(0);
-//         p.play();
-//         return;
-//       }
-//     }
-
-//     // setTimeout(() => {
-//     //   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-//     // }, 200);
-//   };
-//   //////////////////////////
-
-//   const { width: vw } = Dimensions.get("window");
-
-//   const [showCycle, setShowCycle] = useState(false);
-
-//   const [opacity, setOpacity] = useState(1);
-
-//   useEffect(() => {
-//     if (remaining.length === 0) return;
-//     Animated.timing(translateY, {
-//       toValue: 0, // move up
-//       duration: 1,
-//       useNativeDriver: true,
-//     }).start();
-
-//     setOpacity(1);
-//   }, [remaining]);
-
-//   const translateY = useRef(new Animated.Value(0)).current;
-
-//   // const handlePressIn = () => {
-//   //   if (remaining.length === 0) return;
-
-//   //   if (first === null) {
-//   //     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-//   //     // Haptics.selectionAsync();
-
-//   //     translateY.setValue(0);
-//   //     setOpacity(1);
-
-//   //     Animated.timing(translateY, {
-//   //       toValue: -20, // move up
-//   //       duration: 200,
-//   //       useNativeDriver: true,
-//   //     }).start();
-//   //   }
-//   // };
-//   const handlePressIn = () => {
-//     if (remaining.length === 0) return;
-//     if (first !== null) return;
-
-//     // Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
-//     // playSfx(plasticPlayer);
-
-//     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
-//     // setTimeout(() => {
-//     //   if (!mute) {
-//     //     playPlastic();
-//     //   }
-//     // }, 100);
-
-//     translateY.setValue(0);
-//     setOpacity(1);
-
-//     Animated.timing(translateY, {
-//       toValue: -20,
-//       duration: 200,
-//       useNativeDriver: true,
-//     }).start();
-//   };
-
-//   // const handlePressOut = () => {
-//   //   if (first === null) {
-//   //     setShowCycle(true);
-
-//   //     Animated.timing(translateY, {
-//   //       toValue: -120, // move up
-//   //       duration: 100,
-//   //       useNativeDriver: true,
-//   //     }).start(() => {
-//   //       setOpacity(0); // fade out last card
-//   //       handleDraw();
-//   //       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-//   //     });
-//   //   }
-//   // };
-//   const handlePressOut = () => {
-//     // if (first !== null) return;
-
-//     setShowCycle(true);
-
-//     Animated.timing(translateY, {
-//       toValue: -120,
-//       duration: 100,
-//       useNativeDriver: true,
-//     }).start(() => {
-//       setOpacity(0);
-//       handleDraw();
-
-//       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-
-//       setTimeout(() => {
-//         if (!mute) {
-//           playClick();
+// export function HapticTab(props: BottomTabBarButtonProps) {
+//   return (
+//     <PlatformPressable
+//       {...props}
+//       onPressIn={(ev) => {
+//         if (process.env.EXPO_OS === 'ios') {
+//           // Add a soft haptic feedback when pressing down on the tabs.
+//           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 //         }
-//       }, 100);
-
-//       // Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-//     });
-//   };
-
-//   const [cycleBorder, setCycleBorder] = useState(false);
-
-//   const [sound, setSound] = useState(true);
-//   const [labels, setLabels] = useState(true);
-//   const [info, setInfo] = useState(true);
-//   const [restart, setRestart] = useState(true);
-
-//   const [touch, setTouch] = useState(true);
-
-//   return (
-//     <View style={styles.bottomBar}>
-//       <View
-//         style={{
-//           flex: 2,
-//           display: "flex",
-//           flexDirection: "row",
-//           flexWrap: "nowrap",
-//           justifyContent: "center",
-//           alignItems: "center",
-//           height: 70,
-//           paddingVertical: 5,
-//         }}
-//       >
-//         <Pressable
-//           style={{ width: "50%" }}
-//           onPressIn={() => {
-//             Haptics.selectionAsync();
-//             setLabels(false);
-//           }}
-//           onPressOut={() => {
-//             setLabels(true);
-//             setShowLabels(!showLabels);
-//           }}
-//         >
-//           {showLabels ? (
-//             <View
-//               style={{
-//                 display: "flex",
-//                 flexDirection: "column",
-//                 justifyContent: "space-between",
-//                 alignItems: "center",
-//                 height: "100%",
-//                 width: "100%",
-//               }}
-//             >
-//               <View
-//                 style={{
-//                   height: "60%",
-//                   display: "flex",
-//                   flexDirection: "column",
-//                   justifyContent: "center",
-//                   alignItems: "center",
-//                   width: "100%",
-//                 }}
-//               >
-//                 <MaterialCommunityIcons
-//                   name="label-outline"
-//                   size={vw * 0.08}
-//                   color={labels ? "white" : "rgba(255,255,255,0.5)"}
-//                   allowFontScaling={false}
-//                 />
-//               </View>
-//               <Text
-//                 style={{
-//                   color: labels ? "white" : "rgba(255,255,255,0.5)",
-//                   fontSize: vw * 0.035,
-//                   fontFamily: "GowunDodum-Regular",
-//                   height: "40%",
-//                   width: "100%",
-//                   textAlign: "center",
-//                 }}
-//                 allowFontScaling={false}
-//               >
-//                 {helper[lang]}
-//               </Text>
-//             </View>
-//           ) : (
-//             <View
-//               style={{
-//                 display: "flex",
-//                 flexDirection: "column",
-//                 justifyContent: "space-between",
-//                 alignItems: "center",
-//                 height: "100%",
-//               }}
-//             >
-//               <View
-//                 style={{
-//                   height: "60%",
-//                   display: "flex",
-//                   flexDirection: "column",
-//                   justifyContent: "center",
-//                   alignItems: "center",
-//                   width: "100%",
-//                 }}
-//               >
-//                 <MaterialCommunityIcons
-//                   name="label-off-outline"
-//                   size={vw * 0.08}
-//                   color={labels ? "rgba(255,255,255,0.5)" : "white"}
-//                   allowFontScaling={false}
-//                 />
-//               </View>
-//               <Text
-//                 style={{
-//                   color: labels ? "rgba(255,255,255,0.5)" : "white",
-//                   fontSize: vw * 0.035,
-//                   fontFamily: "GowunDodum-Regular",
-//                   height: "40%",
-//                   width: "100%",
-//                   textAlign: "center",
-//                 }}
-//                 allowFontScaling={false}
-//               >
-//                 {helper[lang]}
-//               </Text>
-//             </View>
-//           )}
-//         </Pressable>
-//         <View
-//           style={{
-//             display: "flex",
-//             flexDirection: "column",
-//             justifyContent: "space-between",
-//             alignItems: "center",
-//             height: "100%",
-//             width: "50%",
-//           }}
-//         >
-//           <Text
-//             style={{
-//               color: "white",
-//               fontSize: vw * 0.06,
-//               fontFamily: "Gugi-Regular",
-//               padding: 0,
-//               height: "60%",
-//               textAlignVertical: "center",
-//               width: "100%",
-//               textAlign: "center",
-//             }}
-//             allowFontScaling={false}
-//           >
-//             {remaining.length}
-//           </Text>
-//           <Text
-//             style={{
-//               color: "white",
-//               fontSize: vw * 0.035,
-//               fontFamily: "GowunDodum-Regular",
-//               height: "40%",
-//               width: "100%",
-//               textAlign: "center",
-//             }}
-//             allowFontScaling={false}
-//           >
-//             {count[lang]}
-//           </Text>
-//         </View>
-//       </View>
-//       <View
-//         style={{
-//           flex: 1,
-//           display: "flex",
-//           flexDirection: "column",
-//           justifyContent: "center",
-//           alignItems: "center",
-//           borderRadius: 10,
-//           overflow: "visible",
-//           aspectRatio: 230 / 360,
-//           boxShadow: "inset 1px 1px 2px 1px black",
-//           backgroundColor: "rgba(122, 122, 122, 0.25)",
-//         }}
-//       >
-//         {remaining.length !== 0 && (
-//           <Pressable
-//             style={styles.drawButton}
-//             onPressIn={() => {
-//               handlePressIn();
-//               setTouch(false);
-//             }}
-//             onPressOut={() => {
-//               handlePressOut();
-//               setTouch(true);
-//             }}
-//           >
-//             <MaterialIcons
-//               name="touch-app"
-//               size={36}
-//               color="rgba(255, 255, 255, 0.75)"
-//               style={{
-//                 padding: 4,
-//                 zIndex: 50,
-//                 opacity: touch ? 1 : 0.5,
-//               }}
-//             />
-//             {/* <View
-//               style={{
-//                 position: "absolute",
-//                 top: "50%",
-//                 left: "50%",
-//                 transform: [{ translateX: "-50%" }, { translateY: "-50%" }],
-//                 zIndex: 50,
-//               }}
-//             >
-//               <Text
-//                 style={{
-//                   color: "rgba(255, 255, 255, 0.8)",
-//                   fontWeight: "500",
-//                   fontSize: 30,
-//                   textAlign: "center",
-//                 }}
-//               >
-//                 {remaining.length}
-//               </Text>
-//             </View> */}
-//             {remaining.slice(-5).map((x, i) => (
-//               <Animated.View
-//                 key={i}
-//                 style={{
-//                   ...styles.imageBox,
-//                   width: vw * 0.15,
-//                   left: "50%",
-//                   top: "50%",
-//                   transform: [
-//                     // { translateX: -30 },
-//                     // { translateY: -0.1 * i - 50 },
-//                     { translateX: -(vw * 0.15) / 2 },
-//                     { translateY: -(vw * 0.15 * (360 / 230)) / 2 },
-//                     ...(x === remaining[remaining.length - 1]
-//                       ? [{ translateY }]
-//                       : []),
-//                     { rotate: `${x.rotation * 1.5}deg` },
-//                   ],
-//                   opacity: x === remaining[remaining.length - 1] ? opacity : 1,
-//                 }}
-//               >
-//                 <Image
-//                   source={require("../assets/cardImgs/backOG.webp")}
-//                   style={styles.image}
-//                   resizeMode="stretch"
-//                 />
-//               </Animated.View>
-//             ))}
-//           </Pressable>
-//         )}
-//         {remaining.length === 0 && showCycle && (
-//           <Pressable
-//             // onPress={() => handleDraw()}
-//             onPressIn={() => {
-//               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-//               setCycleBorder(true);
-//             }}
-//             onPressOut={() => {
-//               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-//               setCycleBorder(false);
-//               boxFour.length === 12 ? setOpenResults(true) : handleDraw();
-//               if (!mute && boxFour.length !== 12) {
-//                 playClick();
-//               }
-//             }}
-//             style={{
-//               display: "flex",
-//               justifyContent: "center",
-//               alignItems: "center",
-//               borderWidth: 0,
-//               borderColor: !cycleBorder
-//                 ? "rgba(255, 255, 255, 1)"
-//                 : "rgba(255, 255, 255, 0.5)",
-//               borderRadius: "10%",
-//               overflow: "hidden",
-//               width: vw * 0.15,
-//               aspectRatio: 230 / 360,
-//               borderStyle: "dashed",
-//             }}
-//           >
-//             {boxFour.length !== 12 && (
-//               <Text
-//                 style={{
-//                   color: !cycleBorder
-//                     ? "rgba(255, 217, 0, 1)"
-//                     : "rgba(255, 255, 255, 0.5)",
-//                   fontWeight: "500",
-//                   fontSize: lang === "en" ? vw * 0.04 : vw * 0.05,
-//                   textAlign: "center",
-//                   fontFamily: "Gugi-Regular",
-//                 }}
-//                 allowFontScaling={false}
-//               >
-//                 {cycle[lang]}
-//               </Text>
-//             )}
-//             {boxFour.length === 12 && (
-//               <Text
-//                 style={{
-//                   color: !cycleBorder
-//                     ? "rgba(255, 217, 0, 1)"
-//                     : "rgba(255, 255, 255, 0.5)",
-//                   fontWeight: "500",
-//                   fontSize: lang === "en" ? vw * 0.04 : vw * 0.05,
-//                   textAlign: "center",
-//                   fontFamily: "Gugi-Regular",
-//                 }}
-//                 allowFontScaling={false}
-//               >
-//                 {result[lang]}
-//               </Text>
-//             )}
-//           </Pressable>
-//         )}
-//       </View>
-//       <View
-//         style={{
-//           flex: 2,
-//           display: "flex",
-//           flexDirection: "row",
-//           flexWrap: "nowrap",
-//           justifyContent: "center",
-//           alignItems: "center",
-//           height: 70,
-//           paddingVertical: 5,
-//           paddingHorizontal: 0,
-//         }}
-//       >
-//         <Pressable
-//           style={{ width: "50%" }}
-//           onPressIn={() => {
-//             Haptics.selectionAsync();
-//             setSound(false);
-//           }}
-//           onPressOut={() => {
-//             setSound(true);
-//             setMute(!mute);
-//           }}
-//         >
-//           {!mute ? (
-//             <View
-//               style={{
-//                 display: "flex",
-//                 flexDirection: "column",
-//                 justifyContent: "space-between",
-//                 alignItems: "center",
-//                 height: "100%",
-//               }}
-//             >
-//               <View
-//                 style={{
-//                   height: "60%",
-//                   display: "flex",
-//                   flexDirection: "column",
-//                   justifyContent: "center",
-//                   alignItems: "center",
-//                   width: "100%",
-//                 }}
-//               >
-//                 <Feather
-//                   name="volume-2"
-//                   size={vw * 0.08}
-//                   color={sound ? "white" : "rgba(255,255,255,0.5)"}
-//                   allowFontScaling={false}
-//                 />
-//               </View>
-//               <Text
-//                 style={{
-//                   color: sound ? "white" : "rgba(255,255,255,0.5)",
-//                   fontSize: vw * 0.035,
-//                   fontFamily: "GowunDodum-Regular",
-//                   height: "40%",
-//                   width: "100%",
-//                   textAlign: "center",
-//                 }}
-//                 allowFontScaling={false}
-//               >
-//                 {audio[lang]}
-//               </Text>
-//             </View>
-//           ) : (
-//             <View
-//               style={{
-//                 display: "flex",
-//                 flexDirection: "column",
-//                 justifyContent: "space-between",
-//                 alignItems: "center",
-//                 height: "100%",
-//               }}
-//             >
-//               <View
-//                 style={{
-//                   height: "60%",
-//                   display: "flex",
-//                   flexDirection: "column",
-//                   justifyContent: "center",
-//                   alignItems: "center",
-//                   width: "100%",
-//                 }}
-//               >
-//                 <Feather
-//                   name="volume-x"
-//                   size={vw * 0.08}
-//                   color={sound ? "rgba(255,255,255,0.5)" : "white"}
-//                   allowFontScaling={false}
-//                 />
-//               </View>
-//               <Text
-//                 style={{
-//                   color: sound ? "rgba(255,255,255,0.5)" : "white",
-//                   fontSize: vw * 0.035,
-//                   fontFamily: "GowunDodum-Regular",
-//                   height: "40%",
-//                   width: "100%",
-//                   textAlign: "center",
-//                 }}
-//                 allowFontScaling={false}
-//               >
-//                 {audio[lang]}
-//               </Text>
-//             </View>
-//           )}
-//         </Pressable>
-//         <Pressable
-//           style={{
-//             width: "50%",
-//           }}
-//           onPressIn={() => {
-//             Haptics.selectionAsync();
-//             setRestart(false);
-//           }}
-//           onPressOut={() => {
-//             setRestart(true);
-//             setResetOpen(true);
-//           }}
-//         >
-//           <View
-//             style={{
-//               display: "flex",
-//               flexDirection: "column",
-//               justifyContent: "space-between",
-//               alignItems: "center",
-//               height: "100%",
-//             }}
-//           >
-//             <View
-//               style={{
-//                 display: "flex",
-//                 flexDirection: "column",
-//                 justifyContent: "center",
-//                 alignItems: "center",
-//                 height: "60%",
-//                 width: "100%",
-//               }}
-//             >
-//               <Entypo
-//                 name="cycle"
-//                 size={vw * 0.075}
-//                 color={restart ? "white" : "rgba(255,255,255,0.5)"}
-//                 allowFontScaling={false}
-//               />
-//             </View>
-//             <Text
-//               style={{
-//                 color: restart ? "white" : "rgba(255,255,255,0.5)",
-//                 fontSize: vw * 0.035,
-//                 fontFamily: "GowunDodum-Regular",
-//                 height: "40%",
-//                 width: "100%",
-//                 textAlign: "center",
-//               }}
-//               allowFontScaling={false}
-//             >
-//               {retry[lang]}
-//             </Text>
-//           </View>
-//         </Pressable>
-//       </View>
-//     </View>
-//   );
-// };
-
-// export default Controls;
-
-// const styles = StyleSheet.create({
-//   bottomBar: {
-//     height: 100,
-//     width: "100%",
-//     display: "flex",
-//     flexDirection: "row",
-//     justifyContent: "space-between",
-//     alignItems: "center",
-//     marginVertical: 15,
-//   },
-//   drawButton: {
-//     width: "100%",
-//     height: "100%",
-//     display: "flex",
-//     flexDirection: "row",
-//     justifyContent: "center",
-//     alignItems: "center",
-//     position: "relative",
-//   },
-//   imageBox: {
-//     height: "auto",
-//     aspectRatio: "230/360",
-//     position: "absolute",
-//     borderWidth: 0.5,
-//     borderRadius: 3,
-//     overflow: "hidden",
-//     borderColor: "indianred",
-//     backgroundColor: "rgba(188, 26, 8, 1)",
-//     boxShadow: "2px 2px 2px 0px black",
-//   },
-//   image: {
-//     width: "100%",
-//     height: "100%",
-//   },
-// });
-
-import { useAudio } from "@/context/AudioContext";
-import { useLanguage } from "@/context/LanguageContext";
-import { useMute } from "@/context/MuteContext";
-import Entypo from "@expo/vector-icons/Entypo";
-import Feather from "@expo/vector-icons/Feather";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useFonts } from "expo-font";
-import * as Haptics from "expo-haptics";
-import React, { useEffect, useRef, useState } from "react";
-import {
-  Animated,
-  Dimensions,
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-
-interface Card {
-  month: string;
-  rank: string;
-  id: string;
-  img: string;
-  rotation: number;
-  title: { en: string; ko: string };
-  meaning: { en: string; ko: string };
-}
-
-interface Prop {
-  handleDraw: () => void;
-  setVisible: (value: boolean) => void;
-  remaining: Card[];
-  handleReset: () => void;
-  first: Card | null;
-  showLabels: Boolean;
-  setShowLabels: (value: boolean) => void;
-  boxFour: Card[];
-  setOpenResults: (value: boolean) => void;
-  setOpenInfo: (value: boolean) => void;
-  setResetOpen: (value: boolean) => void;
-}
-
-const audio = { en: "Audio", ko: "음향" };
-const helper = { en: "Helper", ko: "도우미" };
-const retry = { en: "Restart", ko: "재시작" };
-const cycle = { en: "Cycle Deck", ko: "순환" };
-const result = { en: "Open Result", ko: "결과 열기" };
-const count = { en: "In Deck", ko: "남은 패" };
-
-const Controls = ({
-  handleDraw,
-  setVisible,
-  remaining,
-  handleReset,
-  first,
-  showLabels,
-  setShowLabels,
-  boxFour,
-  setOpenResults,
-  setOpenInfo,
-  setResetOpen,
-}: Prop) => {
-  const { lang } = useLanguage();
-  const { mute, setMute } = useMute();
-  const { playClick } = useAudio();
-
-  const [fontsLoaded] = useFonts({
-    "GowunDodum-Regular": require("../assets/fonts/GowunDodum-Regular.ttf"),
-    "Gugi-Regular": require("../assets/fonts/Gugi-Regular.ttf"),
-  });
-
-  const { width: vw } = Dimensions.get("window");
-
-  const [showCycle, setShowCycle] = useState(false);
-  // const [opacity, setOpacity] = useState(1);
-
-  // useEffect(() => {
-  //   if (remaining.length === 0) return;
-  //   Animated.timing(translateY, {
-  //     toValue: 0,
-  //     duration: 1,
-  //     useNativeDriver: true,
-  //   }).start();
-  //   setOpacity(1);
-  // }, [remaining]);
-
-  useEffect(() => {
-    if (remaining.length === 0) return;
-    translateY.setValue(0);
-    animatedOpacity.setValue(1);
-  }, [remaining]);
-
-  // const translateY = useRef(new Animated.Value(0)).current;
-
-  // const handlePressIn = () => {
-  //   if (remaining.length === 0) return;
-  //   if (first !== null) return;
-
-  //   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
-  //   translateY.setValue(0);
-  //   setOpacity(1);
-
-  //   Animated.timing(translateY, {
-  //     toValue: -20,
-  //     duration: 200,
-  //     useNativeDriver: true,
-  //   }).start();
-  // };
-
-  // const handlePressOut = () => {
-  //   setShowCycle(true);
-
-  //   Animated.timing(translateY, {
-  //     toValue: -120,
-  //     duration: 100,
-  //     useNativeDriver: true,
-  //   }).start(() => {
-  //     setOpacity(0);
-  //     handleDraw();
-  //     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-  //     setTimeout(() => playClick(), 100);
-  //   });
-  // };
-
-  const translateY = useRef(new Animated.Value(0)).current;
-  const animatedOpacity = useRef(new Animated.Value(1)).current;
-
-  const handlePressIn = () => {
-    if (remaining.length === 0) return;
-    if (first !== null) return;
-
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
-    translateY.setValue(0);
-    animatedOpacity.setValue(1);
-
-    Animated.timing(translateY, {
-      toValue: -20,
-      duration: 100,
-      useNativeDriver: true, // ✅
-    }).start();
-  };
-
-  const handlePressOut = () => {
-    setShowCycle(true);
-
-    Animated.timing(translateY, {
-      toValue: -100,
-      duration: 50,
-      useNativeDriver: true, // ✅
-    }).start(() => {
-      Animated.timing(animatedOpacity, {
-        toValue: 0,
-        duration: 0,
-        useNativeDriver: true, // ✅
-      }).start();
-      handleDraw();
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-      setTimeout(() => playClick(), 50);
-    });
-  };
-
-  const [cycleBorder, setCycleBorder] = useState(false);
-  const [sound, setSound] = useState(true);
-  const [labels, setLabels] = useState(true);
-  const [restart, setRestart] = useState(true);
-  const [touch, setTouch] = useState(true);
-
-  return (
-    <View style={styles.bottomBar}>
-      {/* Left side: Labels + Card Count */}
-      <View
-        style={{
-          flex: 2,
-          flexDirection: "row",
-          justifyContent: "center",
-          alignItems: "center",
-          height: 70,
-          paddingVertical: 5,
-        }}
-      >
-        <Pressable
-          style={{ width: "50%" }}
-          onPressIn={() => {
-            Haptics.selectionAsync();
-            setLabels(false);
-          }}
-          onPressOut={() => {
-            setLabels(true);
-            setShowLabels(!showLabels);
-          }}
-        >
-          <View style={styles.btnCol}>
-            <View style={styles.btnIconWrap}>
-              <MaterialCommunityIcons
-                name={showLabels ? "label-outline" : "label-off-outline"}
-                size={vw * 0.08}
-                color={labels ? "white" : "rgba(255,255,255,0.5)"}
-                allowFontScaling={false}
-              />
-            </View>
-            <Text
-              style={{
-                color: labels ? "white" : "rgba(255,255,255,0.5)",
-                fontSize: vw * 0.035,
-                fontFamily: "GowunDodum-Regular",
-                height: "40%",
-                width: "100%",
-                textAlign: "center",
-              }}
-              allowFontScaling={false}
-            >
-              {helper[lang]}
-            </Text>
-          </View>
-        </Pressable>
-
-        {/* Card count */}
-        <View style={{ ...styles.btnCol, width: "50%" }}>
-          <Text
-            style={{
-              color: "white",
-              fontSize: vw * 0.06,
-              fontFamily: "Gugi-Regular",
-              height: "60%",
-              textAlignVertical: "center",
-              width: "100%",
-              textAlign: "center",
-            }}
-            allowFontScaling={false}
-          >
-            {remaining.length}
-          </Text>
-          <Text
-            style={{
-              color: "white",
-              fontSize: vw * 0.035,
-              fontFamily: "GowunDodum-Regular",
-              height: "40%",
-              width: "100%",
-              textAlign: "center",
-            }}
-            allowFontScaling={false}
-          >
-            {count[lang]}
-          </Text>
-        </View>
-      </View>
-
-      {/* Center: Draw deck */}
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          borderRadius: 10,
-          overflow: "visible",
-          aspectRatio: 230 / 360,
-          // boxShadow: "inset 1px 1px 2px 1px black",
-          borderWidth: 1,
-          borderLeftWidth: 2,
-          borderTopWidth: 2,
-          backgroundColor: "rgba(122, 122, 122, 0.25)",
-        }}
-      >
-        {remaining.length !== 0 && (
-          <Pressable
-            style={styles.drawButton}
-            onPressIn={() => {
-              handlePressIn();
-              setTouch(false);
-            }}
-            onPressOut={() => {
-              handlePressOut();
-              setTouch(true);
-            }}
-          >
-            <MaterialIcons
-              name="touch-app"
-              size={36}
-              color="rgba(255, 255, 255, 0.75)"
-              style={{ padding: 4, zIndex: 50, opacity: touch ? 1 : 0.5 }}
-            />
-            {remaining.slice(-3).map((x, i) => (
-              <Animated.View
-                key={i}
-                style={{
-                  ...styles.imageBox,
-                  width: vw * 0.15,
-                  left: "50%",
-                  top: "50%",
-                  transform: [
-                    { translateX: -(vw * 0.15) / 2 },
-                    { translateY: -(vw * 0.15 * (360 / 230)) / 2 },
-                    ...(x === remaining[remaining.length - 1]
-                      ? [{ translateY }]
-                      : []),
-                    // { rotate: `${x.rotation * 1.5}deg` },
-                  ],
-                  // opacity: x === remaining[remaining.length - 1] ? opacity : 1,
-                  // On the top card in remaining.slice(-5).map:
-                  opacity:
-                    x === remaining[remaining.length - 1]
-                      ? animatedOpacity
-                      : new Animated.Value(1),
-                }}
-              >
-                <Image
-                  source={require("../assets/cardImgs/backOG.webp")}
-                  style={styles.image}
-                  resizeMode="stretch"
-                />
-              </Animated.View>
-            ))}
-          </Pressable>
-        )}
-
-        {remaining.length === 0 && showCycle && (
-          <Pressable
-            onPressIn={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setCycleBorder(true);
-            }}
-            onPressOut={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setCycleBorder(false);
-              if (boxFour.length === 12) {
-                setOpenResults(true);
-              } else {
-                handleDraw();
-                playClick();
-              }
-            }}
-            style={{
-              justifyContent: "center",
-              alignItems: "center",
-              borderRadius: "10%",
-              overflow: "hidden",
-              width: vw * 0.15,
-              aspectRatio: 230 / 360,
-              borderStyle: "dashed",
-            }}
-          >
-            <Text
-              style={{
-                color: !cycleBorder
-                  ? "rgba(255, 217, 0, 1)"
-                  : "rgba(255, 255, 255, 0.5)",
-                fontWeight: "500",
-                fontSize: lang === "en" ? vw * 0.04 : vw * 0.05,
-                textAlign: "center",
-                fontFamily: "Gugi-Regular",
-              }}
-              allowFontScaling={false}
-            >
-              {boxFour.length === 12 ? result[lang] : cycle[lang]}
-            </Text>
-          </Pressable>
-        )}
-      </View>
-
-      {/* Right side: Mute + Restart */}
-      <View
-        style={{
-          flex: 2,
-          flexDirection: "row",
-          justifyContent: "center",
-          alignItems: "center",
-          height: 70,
-          paddingVertical: 5,
-        }}
-      >
-        <Pressable
-          style={{ width: "50%" }}
-          onPressIn={() => {
-            Haptics.selectionAsync();
-            setSound(false);
-          }}
-          onPressOut={() => {
-            setSound(true);
-            setMute(!mute);
-          }}
-        >
-          <View style={styles.btnCol}>
-            <View style={styles.btnIconWrap}>
-              <Feather
-                name={mute ? "volume-x" : "volume-2"}
-                size={vw * 0.08}
-                color={sound ? "white" : "rgba(255,255,255,0.5)"}
-                allowFontScaling={false}
-              />
-            </View>
-            <Text
-              style={{
-                color: sound ? "white" : "rgba(255,255,255,0.5)",
-                fontSize: vw * 0.035,
-                fontFamily: "GowunDodum-Regular",
-                height: "40%",
-                width: "100%",
-                textAlign: "center",
-              }}
-              allowFontScaling={false}
-            >
-              {audio[lang]}
-            </Text>
-          </View>
-        </Pressable>
-
-        <Pressable
-          style={{ width: "50%" }}
-          onPressIn={() => {
-            Haptics.selectionAsync();
-            setRestart(false);
-          }}
-          onPressOut={() => {
-            setRestart(true);
-            setResetOpen(true);
-          }}
-        >
-          <View style={styles.btnCol}>
-            <View style={styles.btnIconWrap}>
-              <Entypo
-                name="cycle"
-                size={vw * 0.075}
-                color={restart ? "white" : "rgba(255,255,255,0.5)"}
-                allowFontScaling={false}
-              />
-            </View>
-            <Text
-              style={{
-                color: restart ? "white" : "rgba(255,255,255,0.5)",
-                fontSize: vw * 0.035,
-                fontFamily: "GowunDodum-Regular",
-                height: "40%",
-                width: "100%",
-                textAlign: "center",
-              }}
-              allowFontScaling={false}
-            >
-              {retry[lang]}
-            </Text>
-          </View>
-        </Pressable>
-      </View>
-    </View>
-  );
-};
-
-export default Controls;
-
-const styles = StyleSheet.create({
-  bottomBar: {
-    height: 100,
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginVertical: 15,
-  },
-  drawButton: {
-    width: "100%",
-    height: "100%",
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    position: "relative",
-  },
-  imageBox: {
-    height: "auto",
-    aspectRatio: "230/360",
-    position: "absolute",
-    borderWidth: 1,
-    borderRadius: 3,
-    overflow: "hidden",
-    borderColor: "black",
-    backgroundColor: "rgba(188, 26, 8, 1)",
-    // boxShadow: "2px 2px 2px 0px black",
-    borderBottomWidth: 2,
-    borderRightWidth: 2,
-    borderLeftWidth: 1,
-  },
-  image: {
-    width: "100%",
-    height: "100%",
-  },
-  btnCol: {
-    flexDirection: "column",
-    justifyContent: "space-between",
-    alignItems: "center",
-    height: "100%",
-    width: "100%",
-  },
-  btnIconWrap: {
-    height: "60%",
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
-  },
-});
-</file>
-
-<file path="components/fourStack.tsx">
-// import { useLanguage } from "@/context/LanguageContext";
-// import {
-//   Jua_400Regular,
-//   useFonts as useJuaFonts,
-// } from "@expo-google-fonts/jua";
-// import { useAudioPlayer } from "expo-audio";
-// import * as Haptics from "expo-haptics";
-// import React, { useEffect } from "react";
-// import {
-//   Dimensions,
-//   Image,
-//   Pressable,
-//   StyleSheet,
-//   Text,
-//   View,
-// } from "react-native";
-
-// interface Card {
-//   month: string; // e.g., "Jan", "Feb", etc.
-//   rank: string;
-//   id: string; // optional, unique identifier
-//   img: string;
-//   rotation: number;
-//   title: { en: string; ko: string };
-//   meaning: { en: string; ko: string };
-// }
-
-// interface Prop {
-//   fourCards: Card[];
-//   updateFourCards: (value: Card[]) => void;
-//   imageSet: Record<string, any>;
-//   first: Card | null;
-//   setFirst: (value: Card | null) => void;
-//   second: Card | null;
-//   setSecond: (value: Card | null) => void;
-//   showLabels: Boolean;
-//   mute: Boolean;
-// }
-
-// const FourStack = ({
-//   fourCards,
-//   imageSet,
-//   first,
-//   setFirst,
-//   second,
-//   setSecond,
-//   showLabels,
-//   mute,
-// }: Prop) => {
-//   const { lang } = useLanguage();
-
-//   const [juaLoaded] = useJuaFonts({ Jua_400Regular });
-
-//   // Sounds
-//   ////////////////
-//   const plasticPlayers = [
-//     useAudioPlayer(require("../assets/plastic.mp3")),
-//     // useAudioPlayer(require("../assets/plastic.mp3")),
-//     // useAudioPlayer(require("../assets/plastic.mp3")),
-//   ];
-
-//   useEffect(() => {
-//     plasticPlayers.forEach((p) => {
-//       p.volume = 0.1;
-//     });
-//   }, []);
-
-//   const playPlastic = () => {
-//     for (let i = 0; i < plasticPlayers.length; i++) {
-//       const player = plasticPlayers[i];
-
-//       if (!player.playing) {
-//         player.seekTo(0);
-//         player.play();
-//         return;
-//       }
-//     }
-//     // all busy → drop sound (correct behavior)
-//   };
-//   //////////////////////
-
-//   const { width: vw } = Dimensions.get("window");
-
-//   const handlePress = (card: Card) => {
-//     // Haptics.selectionAsync();
-
-//     if (first === null) {
-//       setFirst(card);
-//       if (!mute) {
-//         playPlastic();
-//       }
-//       console.log("first card selected");
-//     }
-
-//     if (first !== null && card !== first && second === null) {
-//       setSecond(card);
-//       console.log("initial match");
-//     }
-
-//     if (first !== null && card === first) {
-//       setFirst(null);
-//       setSecond(null);
-
-//       console.log("same card");
-//     }
-//   };
-
-//   return (
-//     <View
-//       style={{
-//         width: "20%",
-//         display: "flex",
-//         flexDirection: "column",
-//         flexWrap: "nowrap",
-//         alignItems: "center",
-//         position: "relative",
+//         props.onPressIn?.(ev);
 //       }}
-//     >
-//       {fourCards.map((x, i) => {
-//         return (
-//           <Pressable
-//             key={i}
-//             style={{
-//               ...styles.imageBox,
-//               width: vw * 0.15,
-//               top: vw * 0.15 * (360 / 230) * 0.25 * i,
-//               borderColor: first === x ? "indianred" : "indianred",
-//               borderWidth:
-//                 x === fourCards[fourCards.length - 1]
-//                   ? first === x
-//                     ? 1
-//                     : 1
-//                   : 0.5,
-//               transform:
-//                 x === fourCards[fourCards.length - 1]
-//                   ? [
-//                       // { translateX: rotateInt[i] },
-//                       { rotate: `${x.rotation}deg` },
-//                       { scale: first === x ? 1.15 : 1 },
-//                     ]
-//                   : [
-//                       // { translateX: rotateInt[i] },
-//                       { rotate: `${x.rotation * -1}deg` },
-//                     ],
-//               boxShadow:
-//                 x === fourCards[fourCards.length - 1]
-//                   ? first === x
-//                     ? "0px 0px 0px 2px rgba(255, 217, 0, 1)"
-//                     : "2px 2px 2px black"
-//                   : "1px 1px 2px black",
-//               zIndex: first === x ? 10 : 1,
-//             }}
-//             onPressIn={() =>
-//               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-//             }
-//             onPressOut={() => handlePress(x)}
-//             disabled={x === fourCards[fourCards.length - 1] ? false : true}
-//           >
-//             <Image
-//               source={
-//                 x === fourCards[fourCards.length - 1]
-//                   ? imageSet[x.img]
-//                   : require("../assets/cardImgs/backOG.webp")
-//               }
-//               style={styles.image}
-//               resizeMode="stretch"
-//             ></Image>
-//             {showLabels && (
-//               <View
-//                 style={{
-//                   position: "absolute",
-//                   right: 0,
-//                   left: 0,
-//                   bottom: 0,
-//                   margin: 1,
-//                   justifyContent: "center",
-//                   alignItems: "center",
-//                 }}
-//               >
-//                 <Text
-//                   style={{
-//                     backgroundColor: "rgba(255, 217, 0, 1)",
-//                     width: "100%",
-//                     color: "black",
-//                     textAlign: "center",
-//                     fontSize: lang === "en" ? vw * 0.03 : vw * 0.03,
-//                     fontWeight: "500",
-//                     paddingVertical: 1,
-//                     opacity: x === fourCards[fourCards.length - 1] ? 1 : 0,
-//                   }}
-//                 >
-//                   {x.title[lang]}
-//                 </Text>
-//               </View>
-//             )}
-//           </Pressable>
-//         );
-//       })}
-//     </View>
+//     />
 //   );
-// };
+// }
 
-// export default FourStack;
-
-// const styles = StyleSheet.create({
-//   imageBox: {
-//     aspectRatio: "230/360",
-//     position: "absolute",
-//     borderRadius: 3,
-//     overflow: "hidden",
-//     backgroundColor: "rgba(188, 26, 8, 1)",
-//   },
-//   image: {
-//     width: "100%",
-//     height: "100%",
-//   },
-// });
-
-import { useAudio } from "@/context/AudioContext";
-import { useLanguage } from "@/context/LanguageContext";
-import {
-  Jua_400Regular,
-  useFonts as useJuaFonts,
-} from "@expo-google-fonts/jua";
 import * as Haptics from "expo-haptics";
-import React from "react";
-import {
-  Dimensions,
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, type PressableProps } from "react-native";
 
-interface Card {
-  month: string;
-  rank: string;
-  id: string;
-  img: string;
-  rotation: number;
-  title: { en: string; ko: string };
-  meaning: { en: string; ko: string };
-}
-
-interface Prop {
-  fourCards: Card[];
-  updateFourCards: (value: Card[]) => void;
-  imageSet: Record<string, any>;
-  first: Card | null;
-  setFirst: (value: Card | null) => void;
-  second: Card | null;
-  setSecond: (value: Card | null) => void;
-  showLabels: Boolean;
-}
-
-const FourStack = ({
-  fourCards,
-  imageSet,
-  first,
-  setFirst,
-  second,
-  setSecond,
-  showLabels,
-}: Prop) => {
-  const { lang } = useLanguage();
-  const { playPlastic } = useAudio();
-
-  const [juaLoaded] = useJuaFonts({ Jua_400Regular });
-
-  const { width: vw } = Dimensions.get("window");
-
-  const handlePress = (card: Card) => {
-    if (first === null) {
-      setFirst(card);
-      playPlastic();
-      console.log("first card selected");
-      return;
-    }
-
-    if (card === first) {
-      setFirst(null);
-      setSecond(null);
-      console.log("same card");
-      return;
-    }
-
-    if (second === null) {
-      setSecond(card);
-      console.log("initial match");
-    }
-  };
-
+export function HapticTab(props: PressableProps) {
   return (
-    <View
-      style={{
-        width: "20%",
-        flexDirection: "column",
-        alignItems: "center",
-        position: "relative",
+    <Pressable
+      {...props}
+      onPressIn={(ev) => {
+        if (process.env.EXPO_OS === "ios") {
+          // Add a soft haptic feedback when pressing down on the tabs.
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+        props.onPressIn?.(ev);
       }}
-    >
-      {fourCards.map((x, i) => {
-        const isTop = x === fourCards[fourCards.length - 1];
-        const isSelected = first === x;
-
-        return (
-          <Pressable
-            key={i}
-            style={{
-              ...styles.imageBox,
-              width: vw * 0.15,
-              top: vw * 0.15 * (360 / 230) * 0.25 * i,
-              borderWidth: isSelected ? 2 : 1,
-              borderBottomWidth: 2,
-              borderRightWidth: 2,
-              borderColor: isSelected
-                ? "rgba(255, 217, 0, 1)"
-                : "rgba(0,0,0,0.5)",
-              transform: isTop
-                ? [
-                    { rotate: `${x.rotation}deg` },
-                    { scale: isSelected ? 1.15 : 1 },
-                  ]
-                : [{ rotate: `${x.rotation * -1}deg` }],
-              // boxShadow: isSelected
-              //   ? "0px 0px 0px 2px rgba(255, 217, 0, 1)"
-              //   : isTop
-              //     ? "2px 2px 2px black"
-              //     : "1px 1px 2px black",
-              elevation: 0,
-              shadowColor: "#000000",
-              zIndex: isSelected ? 10 : 1,
-            }}
-            onPressIn={() =>
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-            }
-            onPressOut={() => handlePress(x)}
-            disabled={!isTop}
-          >
-            <Image
-              source={
-                isTop
-                  ? imageSet[x.img]
-                  : require("../assets/cardImgs/backOG.webp")
-              }
-              style={styles.image}
-              resizeMode="stretch"
-            />
-            {showLabels && isTop && (
-              <View style={styles.labelWrap}>
-                <Text
-                  style={{
-                    backgroundColor: "rgba(255, 217, 0, 1)",
-                    width: "100%",
-                    color: "black",
-                    textAlign: "center",
-                    fontSize: vw * 0.03,
-                    fontWeight: "500",
-                    paddingVertical: 1,
-                  }}
-                >
-                  {x.title[lang]}
-                </Text>
-              </View>
-            )}
-          </Pressable>
-        );
-      })}
-    </View>
+    />
   );
-};
-
-export default FourStack;
-
-const styles = StyleSheet.create({
-  imageBox: {
-    aspectRatio: "230/360",
-    position: "absolute",
-    borderRadius: 3,
-    overflow: "hidden",
-    backgroundColor: "rgba(188, 26, 8, 1)",
-  },
-  image: {
-    width: "100%",
-    height: "100%",
-  },
-  labelWrap: {
-    position: "absolute",
-    right: 0,
-    left: 0,
-    bottom: 0,
-    margin: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
-</file>
-
-<file path="components/header.tsx">
-import { useLanguage } from "@/context/LanguageContext";
-import Feather from "@expo/vector-icons/Feather";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { useFonts } from "expo-font";
-import * as Haptics from "expo-haptics";
-import React, { useState } from "react";
-import { Dimensions, Pressable, StyleSheet, Text, View } from "react-native";
-
-interface Prop {
-  setOpenInfo: (value: boolean) => void;
 }
-
-const language = { en: "ENG", ko: "한국어" };
-const information = { en: "Info", ko: "정보" };
-
-const Header = ({ setOpenInfo }: Prop) => {
-  const { width: vw } = Dimensions.get("window");
-
-  const { lang, setLang } = useLanguage();
-  const toggleLang = () => setLang(lang === "en" ? "ko" : "en");
-
-  const [fontsLoaded] = useFonts({
-    // Point directly to your local asset
-    "GowunDodum-Regular": require("../assets/fonts/GowunDodum-Regular.ttf"),
-    "Gugi-Regular": require("../assets/fonts/Gugi-Regular.ttf"),
-  });
-
-  const date = new Date().toLocaleDateString();
-  const dayNum = new Date().getDay();
-  const days = [
-    { en: "Sun", ko: "일요일" },
-    { en: "Mon", ko: "월요일" },
-    { en: "Tue", ko: "화요일" },
-    { en: "Wed", ko: "수요일" },
-    { en: "Thu", ko: "목요일" },
-    { en: "Fri", ko: "금요일" },
-    { en: "Sat", ko: "토요일" },
-  ];
-
-  const [english, setEnglish] = useState(true);
-  const [info, setInfo] = useState(true);
-
-  return (
-    <View style={styles.header}>
-      <View
-        style={{
-          height: "100%",
-          display: "flex",
-          flex: 1,
-          justifyContent: "center",
-        }}
-      >
-        <Pressable
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            alignSelf: "flex-start",
-            height: "100%",
-            width: 50,
-            gap: 4,
-          }}
-          onPressIn={() => {
-            Haptics.selectionAsync();
-            setEnglish(false);
-          }}
-          onPressOut={() => {
-            setEnglish(true);
-            toggleLang();
-          }}
-        >
-          <Ionicons
-            name="globe-outline"
-            size={vw * 0.07}
-            color={english ? "white" : "rgba(255,255,255,0.5)"}
-            allowFontScaling={false}
-          />
-          <Text
-            style={{
-              color: english ? "white" : "rgba(255,255,255,0.5)",
-              fontSize: vw * 0.035,
-              fontFamily: "GowunDodum-Regular",
-              width: "100%",
-              textAlign: "center",
-            }}
-            allowFontScaling={false}
-          >
-            {language[lang]}
-          </Text>
-        </Pressable>
-      </View>
-      <View
-        style={{
-          display: "flex",
-          flex: 3,
-          flexDirection: "column",
-          flexWrap: "nowrap",
-          alignItems: "center",
-          height: "100%",
-          justifyContent: "center",
-          gap: 0,
-        }}
-      >
-        {/* <View
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            flexWrap: "nowrap",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 1,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: vw * 0.04,
-              color: "rgba(255, 255, 255, 1)",
-              fontFamily: "GowunDodum-Regular",
-            }}
-            allowFontScaling={false}
-          >
-            {lang === "en" ? "화투점" : "Hwatu Tarot"}
-          </Text>
-          <Text
-            style={{
-              fontSize: vw * 0.07,
-              color: "rgba(255, 217, 0, 1)",
-              fontFamily: "GowunDodum-Regular",
-            }}
-            allowFontScaling={false}
-          >
-            {lang === "en" ? "Hwatu Tarot" : "화투점"}
-          </Text>
-        </View> */}
-        <View
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            flexWrap: "nowrap",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "100%",
-            height: "100%",
-          }}
-        >
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              flexWrap: "nowrap",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "100%",
-              height: "100%",
-              gap: 10,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: vw * 0.06,
-                height: "100%",
-                color: "rgb(255, 217, 0)",
-                fontFamily: "Gugi-Regular",
-                textAlign: "center",
-                textAlignVertical: "center",
-                flexShrink: 0,
-                includeFontPadding: false,
-                minWidth: vw * 0.12,
-              }}
-              allowFontScaling={false}
-              numberOfLines={1}
-            >
-              {days[dayNum][lang]}
-            </Text>
-            <Text
-              style={{
-                fontSize: vw * 0.06,
-                height: "100%",
-                color: "rgb(255, 217, 0)",
-                fontFamily: "Gugi-Regular",
-                textAlign: "center",
-                textAlignVertical: "center",
-              }}
-              allowFontScaling={false}
-            >
-              {date}
-            </Text>
-          </View>
-        </View>
-      </View>
-      <View
-        style={{
-          height: "100%",
-          display: "flex",
-          flex: 1,
-          justifyContent: "center",
-        }}
-      >
-        <Pressable
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            alignSelf: "flex-end",
-            height: "100%",
-            width: 50,
-            gap: 4,
-          }}
-          onPressIn={() => {
-            Haptics.selectionAsync();
-            setInfo(false);
-          }}
-          onPressOut={() => {
-            setInfo(true);
-            setOpenInfo(true);
-          }}
-        >
-          <Feather
-            name="info"
-            size={vw * 0.07}
-            color={info ? "white" : "rgba(255,255,255,0.5)"}
-            allowFontScaling={false}
-          />
-          <Text
-            style={{
-              color: info ? "white" : "rgba(255,255,255,0.5)",
-              fontSize: vw * 0.035,
-              fontFamily: "GowunDodum-Regular",
-              width: "100%",
-              textAlign: "center",
-            }}
-            allowFontScaling={false}
-          >
-            {information[lang]}
-          </Text>
-        </Pressable>
-      </View>
-    </View>
-  );
-};
-
-export default Header;
-
-const styles = StyleSheet.create({
-  header: {
-    width: "100%",
-    height: "7%",
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-evenly",
-    alignItems: "center",
-    paddingHorizontal: 20,
-  },
-});
 </file>
 
 <file path="components/resetOverlay.tsx">
@@ -4419,481 +2442,87 @@ export default ResetOverlay;
 const styles = StyleSheet.create({});
 </file>
 
-<file path="components/resultsOverlay.tsx">
-import { useLanguage } from "@/context/LanguageContext";
-import { useFonts } from "expo-font";
-import * as Haptics from "expo-haptics";
-import React, { useEffect, useState } from "react";
-import {
-  Animated,
-  Dimensions,
-  Image,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+<file path="context/AudioContext.tsx">
+import { useAudioPlayer } from "expo-audio";
+import React, { createContext, useContext, useEffect, useRef } from "react";
+import { useMute } from "./MuteContext";
 
-interface Card {
-  month: string; // e.g., "Jan", "Feb", etc.
-  rank: string;
-  id: string; // optional, unique identifier
-  img: string;
-  rotation: number;
-  title: { en: string; ko: string };
-  meaning: { en: string; ko: string };
+interface AudioContextType {
+  playSmack: () => void;
+  playPlastic: () => void;
+  playClick: () => void;
 }
 
-type Props = {
-  setOpenResults: (value: boolean) => void;
-  boxOne: Card[];
-  boxTwo: Card[];
-  boxThree: Card[];
-  boxFour: Card[];
-  imageSet: Record<string, any>;
-  setResults: (value: Card[][]) => void;
-};
+const AudioContext = createContext<AudioContextType>({
+  playSmack: () => {},
+  playPlastic: () => {},
+  playClick: () => {},
+});
 
-const close = { en: "Close", ko: "닫기" };
+export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
+  const { mute } = useMute();
 
-const result = { en: "Reading", ko: "운세" };
+  // --- Smack pool (card matched into box) ---
+  const smack1 = useAudioPlayer(require("../assets/smack.mp3"));
+  const smack2 = useAudioPlayer(require("../assets/smack.mp3"));
 
-const months: String[] = [
-  "jan",
-  "feb",
-  "mar",
-  "apr",
-  "may",
-  "jun",
-  "jul",
-  "aug",
-  "sep",
-  "oct",
-  "nov",
-  "dec",
-];
+  // --- Plastic pool (card selected) ---
+  const plastic1 = useAudioPlayer(require("../assets/plastic.mp3"));
+  const plastic2 = useAudioPlayer(require("../assets/plastic.mp3"));
 
-const ranks = ["A", "B", "C", "D"];
+  // --- Click pool (draw button) ---
+  const click1 = useAudioPlayer(require("../assets/click.mp3"));
+  const click2 = useAudioPlayer(require("../assets/click.mp3"));
 
-const ResultsOverlay = ({
-  setOpenResults,
-  boxOne,
-  boxTwo,
-  boxThree,
-  boxFour,
-  imageSet,
-  setResults,
-}: Props) => {
-  const { width: vw, height: vh } = Dimensions.get("window");
-
-  const { lang } = useLanguage();
-
-  const [fontsLoaded] = useFonts({
-    // Point directly to your local asset
-    "GowunDodum-Regular": require("../assets/fonts/GowunDodum-Regular.ttf"),
-    "Gugi-Regular": require("../assets/fonts/Gugi-Regular.ttf"),
-  });
-
-  const [translateClose, setTranslateClose] = useState(0);
-  const [opacity] = useState(new Animated.Value(0));
-
+  // Ref so playFromPool always sees latest mute value without re-renders
+  const muteRef = useRef(mute);
   useEffect(() => {
-    Animated.timing(opacity, {
-      toValue: 1,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
+    muteRef.current = mute;
+  }, [mute]);
+
+  // Set volumes and pre-seek everything to 0 on mount.
+  // Pre-seeking means play() fires instantly with no latency.
+  useEffect(() => {
+    smack1.volume = 0.6;
+    smack2.volume = 0.6;
+    plastic1.volume = 0.3;
+    plastic2.volume = 0.3;
+    click1.volume = 0.7;
+    click2.volume = 0.7;
+
+    [smack1, smack2, plastic1, plastic2, click1, click2].forEach((p) =>
+      p.seekTo(0),
+    );
   }, []);
 
-  const handleClose = () => {
-    Animated.timing(opacity, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => setOpenResults(false));
+  type Player = ReturnType<typeof useAudioPlayer>;
+
+  const playFromPool = (pool: Player[]) => {
+    if (muteRef.current) return;
+    for (let i = 0; i < pool.length; i++) {
+      const p = pool[i];
+      if (!p.playing) {
+        p.play();
+        // Re-seek after a brief delay so it's ready for the next trigger
+        setTimeout(() => p.seekTo(0), 50);
+        return;
+      }
+    }
+    // All players busy — drop the sound rather than queue/delay it
   };
 
-  const [boxes] = useState([boxOne, boxTwo, boxThree, boxFour]);
-
-  const [matches, setMatches] = useState<Card[][]>([]);
-
-  useEffect(() => {
-    if (boxFour.length === 12) {
-      const matched: Card[] = [];
-
-      boxes.map((x, i) => {
-        boxes[i].map((card) => {
-          const monthCounts = boxes[i].reduce(
-            (acc, card) => {
-              acc[card.month] = (acc[card.month] || 0) + 1;
-              return acc;
-            },
-            {} as Record<string, number>,
-          );
-
-          if (monthCounts[card.month] === 4) {
-            matched.push(card);
-          }
-        });
-      });
-
-      const orderedRanks = matched.sort(
-        (a, b) => ranks.indexOf(a.rank) - ranks.indexOf(b.rank),
-      );
-
-      const orderedMonths = orderedRanks.sort(
-        (a, b) => months.indexOf(a.month) - months.indexOf(b.month),
-      );
-
-      const result: Card[][] = [];
-
-      let currentGroup = [orderedMonths[0]];
-
-      for (let i = 1; i < orderedMonths.length; i++) {
-        if (orderedMonths[i].month === orderedMonths[i - 1].month) {
-          currentGroup.push(orderedMonths[i]);
-        } else {
-          result.push(currentGroup);
-          currentGroup = [orderedMonths[i]];
-        }
-      }
-      result.push(currentGroup);
-
-      setMatches(result);
-      setResults(result);
-    }
-  }, [boxFour]);
+  const playSmack = () => playFromPool([smack1, smack2]);
+  const playPlastic = () => playFromPool([plastic1, plastic2]);
+  const playClick = () => playFromPool([click1, click2]);
 
   return (
-    <Animated.View
-      style={{
-        position: "absolute",
-        width: "100%",
-        height: "100%",
-        zIndex: 20,
-        backgroundColor: "rgba(255, 255, 255, 0.3)",
-        opacity,
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <View
-        style={{
-          backgroundColor: "rgba(235, 235, 235, 0.8)",
-          borderRadius: 15,
-          overflow: "hidden",
-          padding: 10,
-          width: "90%",
-          height: "70%",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: 10,
-          // boxShadow: "inset 1px 2px 3px 3px white, 1px 3px 3px 2px black",
-        }}
-      >
-        <View
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            borderRadius: 10,
-            overflow: "hidden",
-            width: "100%",
-            height: vh * 0.05,
-            backgroundColor: "rgb(42, 83, 60)",
-          }}
-        >
-          <Text
-            style={{
-              fontSize: vw * 0.06,
-              fontFamily: "Gugi-Regular",
-              color: "rgba(255, 217, 0, 1)",
-              width: "100%",
-              textAlign: "center",
-            }}
-            allowFontScaling={false}
-          >
-            {new Date().toLocaleDateString()} {result[lang]}
-          </Text>
-        </View>
-        <View
-          style={{
-            width: "100%",
-            height: "80%",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-evenly",
-            alignContent: "center",
-            gap: 0,
-          }}
-        >
-          {/* <View
-            style={{
-              height: "45%",
-              width: "100%",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: 6,
-            }}
-          >
-            {boxes.map((x, i) => (
-              <View
-                key={i}
-                style={{
-                  width: "100%",
-                  height: "22%",
-                  flexDirection: "row",
-                  flexWrap: "nowrap",
-                  justifyContent: "space-around",
-                  alignItems: "center",
-                  gap: 1,
-                  backgroundColor: "rgba(235, 235, 235, 0.8)",
-                  boxShadow: "inset 1px 1px 4px black",
-                  padding: 5,
-                  borderRadius: 10,
-                }}
-              >
-                {boxes[i].map((card, index) => {
-                  const monthCounts = boxes[i].reduce((acc, card) => {
-                    acc[card.month] = (acc[card.month] || 0) + 1;
-                    return acc;
-                  }, {} as Record<string, number>);
-
-                  const hasFour = monthCounts[card.month] === 4;
-
-                  return (
-                    <View
-                      key={index}
-                      style={{
-                        width: "6%",
-                        aspectRatio: 230 / 360,
-                        borderRadius: 1,
-                        // transform: [{ rotate: `${card.rotation}deg` }],
-                        borderColor: "indianred",
-                        borderWidth: 1,
-                        boxShadow: hasFour
-                          ? "0px 0px 0px 3px rgba(56, 129, 50, 1)"
-                          : "1px 1px 1px black",
-                      }}
-                    >
-                      <Image
-                        key={card.id}
-                        source={imageSet[card.img]}
-                        style={{ width: "100%", height: "100%" }}
-                        resizeMode="stretch"
-                      />
-                    </View>
-                  );
-                })}
-              </View>
-            ))}
-          </View> */}
-          <View
-            style={{
-              height: "100%",
-              width: "100%",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            <ScrollView
-              style={{
-                width: "100%",
-                height: "100%",
-                borderRadius: 10,
-                overflow: "hidden",
-                borderColor: "black",
-                padding: 10,
-                // boxShadow: "inset 1px 1px 4px black",
-                backgroundColor: "rgba(235, 235, 235, 0.8)",
-              }}
-              contentContainerStyle={{
-                display: "flex",
-                flexDirection: "column",
-                flexWrap: "nowrap",
-                gap: 5,
-                paddingBottom: 10,
-              }}
-            >
-              {matches.map((x, i) => (
-                <View
-                  key={i}
-                  style={{
-                    height: 80,
-                    display: "flex",
-                    flexDirection: "row",
-                    flexWrap: "wrap",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-
-                    // borderWidth: 1,
-                    // borderColor: "blue",
-                  }}
-                >
-                  <View style={{ width: "40%" }}>
-                    {matches[i].map((card, index) => (
-                      <View
-                        key={index}
-                        style={{
-                          width: 40,
-                          height: "auto",
-                          aspectRatio: "230/360",
-                          borderWidth: 1,
-                          borderRadius: 3,
-                          overflow: "hidden",
-                          borderColor: "black",
-                          position: "absolute",
-                          transform: [
-                            { translateX: index * 25 },
-                            { rotate: `${card.rotation}deg` },
-                          ],
-                          zIndex: 4 - index,
-                          // boxShadow: "3px 3px 4px black",
-                        }}
-                      >
-                        <Image
-                          key={card.id}
-                          source={imageSet[card.img]}
-                          style={{ width: "100%", height: "100%" }}
-                          resizeMode="stretch"
-                        />
-                      </View>
-                    ))}
-                  </View>
-                  <View
-                    style={{
-                      width: "60%",
-                      height: 80,
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "flex-start",
-                      justifyContent: "flex-start",
-                      gap: 0,
-                    }}
-                  >
-                    <View
-                      style={{
-                        width: "100%",
-                        display: "flex",
-                        flexDirection: lang === "en" ? "row" : "row-reverse",
-                        justifyContent: "space-between",
-                        alignItems: "flex-end",
-                      }}
-                    >
-                      <Text
-                        style={{
-                          fontSize: vw * 0.04,
-                          fontWeight: "bold",
-                          fontFamily: "GowunDodum-Regular",
-                          textAlign: "right",
-                        }}
-                        allowFontScaling={true}
-                      >
-                        {matches[i][1].title.en}
-                      </Text>
-                      <Text
-                        style={{
-                          fontSize: vw * 0.04,
-                          fontWeight: "bold",
-                          fontFamily: "GowunDodum-Regular",
-                        }}
-                        allowFontScaling={true}
-                      >
-                        {matches[i][1].title.ko}
-                      </Text>
-                    </View>
-                    <View
-                      style={{
-                        width: "100%",
-                        height: 1,
-                        backgroundColor: "black",
-                      }}
-                    ></View>
-                    <Text
-                      style={{
-                        fontSize: vw * 0.035,
-                        paddingTop: 4,
-                        fontFamily: "GowunDodum-Regular",
-                      }}
-                      allowFontScaling={true}
-                    >
-                      {matches[i][1].meaning[lang]}
-                    </Text>
-                  </View>
-                </View>
-              ))}
-            </ScrollView>
-          </View>
-        </View>
-        <View
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            width: "100%",
-            height: vh * 0.05,
-          }}
-        >
-          <Pressable
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              width: "100%",
-            }}
-            onPress={() => handleClose()}
-            onPressIn={() => {
-              Haptics.selectionAsync();
-              setTranslateClose(2);
-            }}
-            onPressOut={() => setTranslateClose(0)}
-          >
-            <Animated.View
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor:
-                  translateClose === 2 ? "rgb(255, 80, 80)" : "rgb(219, 0, 0)",
-                paddingVertical: 0,
-                height: "100%",
-                width: "100%",
-                borderRadius: 10,
-                overflow: "hidden",
-                // boxShadow: "inset 2px 2px 2px white, 2px 2px 2px 1px black",
-                borderWidth: 3,
-                borderColor: "rgba(255, 190, 190, 0)",
-                transform: [{ translateY: translateClose }],
-              }}
-            >
-              <Text
-                style={{
-                  color: "white",
-                  fontWeight: "500",
-                  fontSize: vw * 0.05,
-                }}
-                allowFontScaling={false}
-              >
-                {close[lang]}
-              </Text>
-            </Animated.View>
-          </Pressable>
-        </View>
-      </View>
-    </Animated.View>
+    <AudioContext.Provider value={{ playSmack, playPlastic, playClick }}>
+      {children}
+    </AudioContext.Provider>
   );
 };
 
-export default ResultsOverlay;
-
-const styles = StyleSheet.create({});
+export const useAudio = () => useContext(AudioContext);
 </file>
 
 <file path="eas.json">
@@ -6132,6 +3761,2341 @@ const styles = StyleSheet.create({
 });
 </file>
 
+<file path="components/controls.tsx">
+// import { useLanguage } from "@/context/LanguageContext";
+// import Entypo from "@expo/vector-icons/Entypo";
+// import Feather from "@expo/vector-icons/Feather";
+// import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+// import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+// import { useAudioPlayer } from "expo-audio";
+// import { useFonts } from "expo-font";
+// import * as Haptics from "expo-haptics";
+// import React, { useEffect, useRef, useState } from "react";
+// import {
+//   Animated,
+//   Dimensions,
+//   Image,
+//   Pressable,
+//   StyleSheet,
+//   Text,
+//   View,
+// } from "react-native";
+
+// interface Card {
+//   month: string; // e.g., 'Jan', 'Feb', etc.
+//   rank: string;
+//   id: string; // optional, unique identifier
+//   img: string;
+//   rotation: number;
+//   title: { en: string; ko: string };
+//   meaning: { en: string; ko: string };
+// }
+
+// interface Prop {
+//   handleDraw: () => void;
+//   setVisible: (value: boolean) => void;
+//   remaining: Card[];
+//   handleReset: () => void;
+//   first: Card | null;
+//   mute: Boolean;
+//   setMute: (value: boolean) => void;
+//   showLabels: Boolean;
+//   setShowLabels: (value: boolean) => void;
+//   boxFour: Card[];
+//   setOpenResults: (value: boolean) => void;
+//   setOpenInfo: (value: boolean) => void;
+//   setResetOpen: (value: boolean) => void;
+// }
+
+// const audio = { en: "Audio", ko: "음향" };
+// const helper = { en: "Helper", ko: "도우미" };
+// const information = { en: "Info", ko: "정보" };
+// const retry = { en: "Restart", ko: "재시작" };
+// const cycle = { en: "Cycle Deck", ko: "순환" };
+// const result = { en: "Open Result", ko: "결과 열기" };
+// const count = { en: "In Deck", ko: "남은 패" };
+
+// const Controls = ({
+//   handleDraw,
+//   setVisible,
+//   remaining,
+//   handleReset,
+//   first,
+//   mute,
+//   setMute,
+//   showLabels,
+//   setShowLabels,
+//   boxFour,
+//   setOpenResults,
+//   setOpenInfo,
+//   setResetOpen,
+// }: Prop) => {
+//   const { lang } = useLanguage();
+
+//   const [fontsLoaded] = useFonts({
+//     // Point directly to your local asset
+//     "GowunDodum-Regular": require("../assets/fonts/GowunDodum-Regular.ttf"),
+//     "Gugi-Regular": require("../assets/fonts/Gugi-Regular.ttf"),
+//   });
+
+//   // Sounds
+//   //////////////////////
+//   // 🔊 DROP-SAFE SOUND POOLS
+//   //////////////////////
+//   // const plasticPlayers = [
+//   //   useAudioPlayer(require("../assets/plastic.mp3")),
+//   //   // useAudioPlayer(require("../assets/plastic.mp3")),
+//   //   // useAudioPlayer(require("../assets/plastic.mp3")),
+//   //   // useAudioPlayer(require("../assets/plastic.mp3")),
+//   // ];
+
+//   const clickPlayers = [
+//     useAudioPlayer(require("../assets/click.mp3")),
+//     // useAudioPlayer(require("../assets/click.mp3")),
+//     // useAudioPlayer(require("../assets/click.mp3")),
+//     // useAudioPlayer(require("../assets/click.mp3")),
+//   ];
+
+//   useEffect(() => {
+//     // plasticPlayers.forEach((p) => (p.volume = 0.05));
+//     clickPlayers.forEach((p) => {p.volume = 0.5;
+//     p.seekTo(0); });
+//   }, []);
+
+//   // const playPlastic = () => {
+//   //   for (let i = 0; i < plasticPlayers.length; i++) {
+//   //     const p = plasticPlayers[i];
+//   //     if (!p.playing) {
+//   //       p.seekTo(0);
+//   //       p.play();
+//   //       return;
+//   //     }
+//   //   }
+
+//   //   // setTimeout(() => {
+//   //   //   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+//   //   // }, 200);
+//   // };
+
+//   const playClick = () => {
+//     for (let i = 0; i < clickPlayers.length; i++) {
+//       const p = clickPlayers[i];
+//       if (!p.playing) {
+//         p.seekTo(0);
+//         p.play();
+//         return;
+//       }
+//     }
+
+//     // setTimeout(() => {
+//     //   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+//     // }, 200);
+//   };
+//   //////////////////////////
+
+//   const { width: vw } = Dimensions.get("window");
+
+//   const [showCycle, setShowCycle] = useState(false);
+
+//   const [opacity, setOpacity] = useState(1);
+
+//   useEffect(() => {
+//     if (remaining.length === 0) return;
+//     Animated.timing(translateY, {
+//       toValue: 0, // move up
+//       duration: 1,
+//       useNativeDriver: true,
+//     }).start();
+
+//     setOpacity(1);
+//   }, [remaining]);
+
+//   const translateY = useRef(new Animated.Value(0)).current;
+
+//   // const handlePressIn = () => {
+//   //   if (remaining.length === 0) return;
+
+//   //   if (first === null) {
+//   //     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+//   //     // Haptics.selectionAsync();
+
+//   //     translateY.setValue(0);
+//   //     setOpacity(1);
+
+//   //     Animated.timing(translateY, {
+//   //       toValue: -20, // move up
+//   //       duration: 200,
+//   //       useNativeDriver: true,
+//   //     }).start();
+//   //   }
+//   // };
+//   const handlePressIn = () => {
+//     if (remaining.length === 0) return;
+//     if (first !== null) return;
+
+//     // Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+//     // playSfx(plasticPlayer);
+
+//     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+//     // setTimeout(() => {
+//     //   if (!mute) {
+//     //     playPlastic();
+//     //   }
+//     // }, 100);
+
+//     translateY.setValue(0);
+//     setOpacity(1);
+
+//     Animated.timing(translateY, {
+//       toValue: -20,
+//       duration: 200,
+//       useNativeDriver: true,
+//     }).start();
+//   };
+
+//   // const handlePressOut = () => {
+//   //   if (first === null) {
+//   //     setShowCycle(true);
+
+//   //     Animated.timing(translateY, {
+//   //       toValue: -120, // move up
+//   //       duration: 100,
+//   //       useNativeDriver: true,
+//   //     }).start(() => {
+//   //       setOpacity(0); // fade out last card
+//   //       handleDraw();
+//   //       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+//   //     });
+//   //   }
+//   // };
+//   const handlePressOut = () => {
+//     // if (first !== null) return;
+
+//     setShowCycle(true);
+
+//     Animated.timing(translateY, {
+//       toValue: -120,
+//       duration: 100,
+//       useNativeDriver: true,
+//     }).start(() => {
+//       setOpacity(0);
+//       handleDraw();
+
+//       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
+//       setTimeout(() => {
+//         if (!mute) {
+//           playClick();
+//         }
+//       }, 100);
+
+//       // Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+//     });
+//   };
+
+//   const [cycleBorder, setCycleBorder] = useState(false);
+
+//   const [sound, setSound] = useState(true);
+//   const [labels, setLabels] = useState(true);
+//   const [info, setInfo] = useState(true);
+//   const [restart, setRestart] = useState(true);
+
+//   const [touch, setTouch] = useState(true);
+
+//   return (
+//     <View style={styles.bottomBar}>
+//       <View
+//         style={{
+//           flex: 2,
+//           display: "flex",
+//           flexDirection: "row",
+//           flexWrap: "nowrap",
+//           justifyContent: "center",
+//           alignItems: "center",
+//           height: 70,
+//           paddingVertical: 5,
+//         }}
+//       >
+//         <Pressable
+//           style={{ width: "50%" }}
+//           onPressIn={() => {
+//             Haptics.selectionAsync();
+//             setLabels(false);
+//           }}
+//           onPressOut={() => {
+//             setLabels(true);
+//             setShowLabels(!showLabels);
+//           }}
+//         >
+//           {showLabels ? (
+//             <View
+//               style={{
+//                 display: "flex",
+//                 flexDirection: "column",
+//                 justifyContent: "space-between",
+//                 alignItems: "center",
+//                 height: "100%",
+//                 width: "100%",
+//               }}
+//             >
+//               <View
+//                 style={{
+//                   height: "60%",
+//                   display: "flex",
+//                   flexDirection: "column",
+//                   justifyContent: "center",
+//                   alignItems: "center",
+//                   width: "100%",
+//                 }}
+//               >
+//                 <MaterialCommunityIcons
+//                   name="label-outline"
+//                   size={vw * 0.08}
+//                   color={labels ? "white" : "rgba(255,255,255,0.5)"}
+//                   allowFontScaling={false}
+//                 />
+//               </View>
+//               <Text
+//                 style={{
+//                   color: labels ? "white" : "rgba(255,255,255,0.5)",
+//                   fontSize: vw * 0.035,
+//                   fontFamily: "GowunDodum-Regular",
+//                   height: "40%",
+//                   width: "100%",
+//                   textAlign: "center",
+//                 }}
+//                 allowFontScaling={false}
+//               >
+//                 {helper[lang]}
+//               </Text>
+//             </View>
+//           ) : (
+//             <View
+//               style={{
+//                 display: "flex",
+//                 flexDirection: "column",
+//                 justifyContent: "space-between",
+//                 alignItems: "center",
+//                 height: "100%",
+//               }}
+//             >
+//               <View
+//                 style={{
+//                   height: "60%",
+//                   display: "flex",
+//                   flexDirection: "column",
+//                   justifyContent: "center",
+//                   alignItems: "center",
+//                   width: "100%",
+//                 }}
+//               >
+//                 <MaterialCommunityIcons
+//                   name="label-off-outline"
+//                   size={vw * 0.08}
+//                   color={labels ? "rgba(255,255,255,0.5)" : "white"}
+//                   allowFontScaling={false}
+//                 />
+//               </View>
+//               <Text
+//                 style={{
+//                   color: labels ? "rgba(255,255,255,0.5)" : "white",
+//                   fontSize: vw * 0.035,
+//                   fontFamily: "GowunDodum-Regular",
+//                   height: "40%",
+//                   width: "100%",
+//                   textAlign: "center",
+//                 }}
+//                 allowFontScaling={false}
+//               >
+//                 {helper[lang]}
+//               </Text>
+//             </View>
+//           )}
+//         </Pressable>
+//         <View
+//           style={{
+//             display: "flex",
+//             flexDirection: "column",
+//             justifyContent: "space-between",
+//             alignItems: "center",
+//             height: "100%",
+//             width: "50%",
+//           }}
+//         >
+//           <Text
+//             style={{
+//               color: "white",
+//               fontSize: vw * 0.06,
+//               fontFamily: "Gugi-Regular",
+//               padding: 0,
+//               height: "60%",
+//               textAlignVertical: "center",
+//               width: "100%",
+//               textAlign: "center",
+//             }}
+//             allowFontScaling={false}
+//           >
+//             {remaining.length}
+//           </Text>
+//           <Text
+//             style={{
+//               color: "white",
+//               fontSize: vw * 0.035,
+//               fontFamily: "GowunDodum-Regular",
+//               height: "40%",
+//               width: "100%",
+//               textAlign: "center",
+//             }}
+//             allowFontScaling={false}
+//           >
+//             {count[lang]}
+//           </Text>
+//         </View>
+//       </View>
+//       <View
+//         style={{
+//           flex: 1,
+//           display: "flex",
+//           flexDirection: "column",
+//           justifyContent: "center",
+//           alignItems: "center",
+//           borderRadius: 10,
+//           overflow: "visible",
+//           aspectRatio: 230 / 360,
+//           boxShadow: "inset 1px 1px 2px 1px black",
+//           backgroundColor: "rgba(122, 122, 122, 0.25)",
+//         }}
+//       >
+//         {remaining.length !== 0 && (
+//           <Pressable
+//             style={styles.drawButton}
+//             onPressIn={() => {
+//               handlePressIn();
+//               setTouch(false);
+//             }}
+//             onPressOut={() => {
+//               handlePressOut();
+//               setTouch(true);
+//             }}
+//           >
+//             <MaterialIcons
+//               name="touch-app"
+//               size={36}
+//               color="rgba(255, 255, 255, 0.75)"
+//               style={{
+//                 padding: 4,
+//                 zIndex: 50,
+//                 opacity: touch ? 1 : 0.5,
+//               }}
+//             />
+//             {/* <View
+//               style={{
+//                 position: "absolute",
+//                 top: "50%",
+//                 left: "50%",
+//                 transform: [{ translateX: "-50%" }, { translateY: "-50%" }],
+//                 zIndex: 50,
+//               }}
+//             >
+//               <Text
+//                 style={{
+//                   color: "rgba(255, 255, 255, 0.8)",
+//                   fontWeight: "500",
+//                   fontSize: 30,
+//                   textAlign: "center",
+//                 }}
+//               >
+//                 {remaining.length}
+//               </Text>
+//             </View> */}
+//             {remaining.slice(-5).map((x, i) => (
+//               <Animated.View
+//                 key={i}
+//                 style={{
+//                   ...styles.imageBox,
+//                   width: vw * 0.15,
+//                   left: "50%",
+//                   top: "50%",
+//                   transform: [
+//                     // { translateX: -30 },
+//                     // { translateY: -0.1 * i - 50 },
+//                     { translateX: -(vw * 0.15) / 2 },
+//                     { translateY: -(vw * 0.15 * (360 / 230)) / 2 },
+//                     ...(x === remaining[remaining.length - 1]
+//                       ? [{ translateY }]
+//                       : []),
+//                     { rotate: `${x.rotation * 1.5}deg` },
+//                   ],
+//                   opacity: x === remaining[remaining.length - 1] ? opacity : 1,
+//                 }}
+//               >
+//                 <Image
+//                   source={require("../assets/cardImgs/backOG.webp")}
+//                   style={styles.image}
+//                   resizeMode="stretch"
+//                 />
+//               </Animated.View>
+//             ))}
+//           </Pressable>
+//         )}
+//         {remaining.length === 0 && showCycle && (
+//           <Pressable
+//             // onPress={() => handleDraw()}
+//             onPressIn={() => {
+//               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+//               setCycleBorder(true);
+//             }}
+//             onPressOut={() => {
+//               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+//               setCycleBorder(false);
+//               boxFour.length === 12 ? setOpenResults(true) : handleDraw();
+//               if (!mute && boxFour.length !== 12) {
+//                 playClick();
+//               }
+//             }}
+//             style={{
+//               display: "flex",
+//               justifyContent: "center",
+//               alignItems: "center",
+//               borderWidth: 0,
+//               borderColor: !cycleBorder
+//                 ? "rgba(255, 255, 255, 1)"
+//                 : "rgba(255, 255, 255, 0.5)",
+//               borderRadius: "10%",
+//               overflow: "hidden",
+//               width: vw * 0.15,
+//               aspectRatio: 230 / 360,
+//               borderStyle: "dashed",
+//             }}
+//           >
+//             {boxFour.length !== 12 && (
+//               <Text
+//                 style={{
+//                   color: !cycleBorder
+//                     ? "rgba(255, 217, 0, 1)"
+//                     : "rgba(255, 255, 255, 0.5)",
+//                   fontWeight: "500",
+//                   fontSize: lang === "en" ? vw * 0.04 : vw * 0.05,
+//                   textAlign: "center",
+//                   fontFamily: "Gugi-Regular",
+//                 }}
+//                 allowFontScaling={false}
+//               >
+//                 {cycle[lang]}
+//               </Text>
+//             )}
+//             {boxFour.length === 12 && (
+//               <Text
+//                 style={{
+//                   color: !cycleBorder
+//                     ? "rgba(255, 217, 0, 1)"
+//                     : "rgba(255, 255, 255, 0.5)",
+//                   fontWeight: "500",
+//                   fontSize: lang === "en" ? vw * 0.04 : vw * 0.05,
+//                   textAlign: "center",
+//                   fontFamily: "Gugi-Regular",
+//                 }}
+//                 allowFontScaling={false}
+//               >
+//                 {result[lang]}
+//               </Text>
+//             )}
+//           </Pressable>
+//         )}
+//       </View>
+//       <View
+//         style={{
+//           flex: 2,
+//           display: "flex",
+//           flexDirection: "row",
+//           flexWrap: "nowrap",
+//           justifyContent: "center",
+//           alignItems: "center",
+//           height: 70,
+//           paddingVertical: 5,
+//           paddingHorizontal: 0,
+//         }}
+//       >
+//         <Pressable
+//           style={{ width: "50%" }}
+//           onPressIn={() => {
+//             Haptics.selectionAsync();
+//             setSound(false);
+//           }}
+//           onPressOut={() => {
+//             setSound(true);
+//             setMute(!mute);
+//           }}
+//         >
+//           {!mute ? (
+//             <View
+//               style={{
+//                 display: "flex",
+//                 flexDirection: "column",
+//                 justifyContent: "space-between",
+//                 alignItems: "center",
+//                 height: "100%",
+//               }}
+//             >
+//               <View
+//                 style={{
+//                   height: "60%",
+//                   display: "flex",
+//                   flexDirection: "column",
+//                   justifyContent: "center",
+//                   alignItems: "center",
+//                   width: "100%",
+//                 }}
+//               >
+//                 <Feather
+//                   name="volume-2"
+//                   size={vw * 0.08}
+//                   color={sound ? "white" : "rgba(255,255,255,0.5)"}
+//                   allowFontScaling={false}
+//                 />
+//               </View>
+//               <Text
+//                 style={{
+//                   color: sound ? "white" : "rgba(255,255,255,0.5)",
+//                   fontSize: vw * 0.035,
+//                   fontFamily: "GowunDodum-Regular",
+//                   height: "40%",
+//                   width: "100%",
+//                   textAlign: "center",
+//                 }}
+//                 allowFontScaling={false}
+//               >
+//                 {audio[lang]}
+//               </Text>
+//             </View>
+//           ) : (
+//             <View
+//               style={{
+//                 display: "flex",
+//                 flexDirection: "column",
+//                 justifyContent: "space-between",
+//                 alignItems: "center",
+//                 height: "100%",
+//               }}
+//             >
+//               <View
+//                 style={{
+//                   height: "60%",
+//                   display: "flex",
+//                   flexDirection: "column",
+//                   justifyContent: "center",
+//                   alignItems: "center",
+//                   width: "100%",
+//                 }}
+//               >
+//                 <Feather
+//                   name="volume-x"
+//                   size={vw * 0.08}
+//                   color={sound ? "rgba(255,255,255,0.5)" : "white"}
+//                   allowFontScaling={false}
+//                 />
+//               </View>
+//               <Text
+//                 style={{
+//                   color: sound ? "rgba(255,255,255,0.5)" : "white",
+//                   fontSize: vw * 0.035,
+//                   fontFamily: "GowunDodum-Regular",
+//                   height: "40%",
+//                   width: "100%",
+//                   textAlign: "center",
+//                 }}
+//                 allowFontScaling={false}
+//               >
+//                 {audio[lang]}
+//               </Text>
+//             </View>
+//           )}
+//         </Pressable>
+//         <Pressable
+//           style={{
+//             width: "50%",
+//           }}
+//           onPressIn={() => {
+//             Haptics.selectionAsync();
+//             setRestart(false);
+//           }}
+//           onPressOut={() => {
+//             setRestart(true);
+//             setResetOpen(true);
+//           }}
+//         >
+//           <View
+//             style={{
+//               display: "flex",
+//               flexDirection: "column",
+//               justifyContent: "space-between",
+//               alignItems: "center",
+//               height: "100%",
+//             }}
+//           >
+//             <View
+//               style={{
+//                 display: "flex",
+//                 flexDirection: "column",
+//                 justifyContent: "center",
+//                 alignItems: "center",
+//                 height: "60%",
+//                 width: "100%",
+//               }}
+//             >
+//               <Entypo
+//                 name="cycle"
+//                 size={vw * 0.075}
+//                 color={restart ? "white" : "rgba(255,255,255,0.5)"}
+//                 allowFontScaling={false}
+//               />
+//             </View>
+//             <Text
+//               style={{
+//                 color: restart ? "white" : "rgba(255,255,255,0.5)",
+//                 fontSize: vw * 0.035,
+//                 fontFamily: "GowunDodum-Regular",
+//                 height: "40%",
+//                 width: "100%",
+//                 textAlign: "center",
+//               }}
+//               allowFontScaling={false}
+//             >
+//               {retry[lang]}
+//             </Text>
+//           </View>
+//         </Pressable>
+//       </View>
+//     </View>
+//   );
+// };
+
+// export default Controls;
+
+// const styles = StyleSheet.create({
+//   bottomBar: {
+//     height: 100,
+//     width: "100%",
+//     display: "flex",
+//     flexDirection: "row",
+//     justifyContent: "space-between",
+//     alignItems: "center",
+//     marginVertical: 15,
+//   },
+//   drawButton: {
+//     width: "100%",
+//     height: "100%",
+//     display: "flex",
+//     flexDirection: "row",
+//     justifyContent: "center",
+//     alignItems: "center",
+//     position: "relative",
+//   },
+//   imageBox: {
+//     height: "auto",
+//     aspectRatio: "230/360",
+//     position: "absolute",
+//     borderWidth: 0.5,
+//     borderRadius: 3,
+//     overflow: "hidden",
+//     borderColor: "indianred",
+//     backgroundColor: "rgba(188, 26, 8, 1)",
+//     boxShadow: "2px 2px 2px 0px black",
+//   },
+//   image: {
+//     width: "100%",
+//     height: "100%",
+//   },
+// });
+
+import { useAudio } from "@/context/AudioContext";
+import { useLanguage } from "@/context/LanguageContext";
+import { useMute } from "@/context/MuteContext";
+import Entypo from "@expo/vector-icons/Entypo";
+import Feather from "@expo/vector-icons/Feather";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { useFonts } from "expo-font";
+import * as Haptics from "expo-haptics";
+import { useEffect, useRef, useState } from "react";
+import {
+  Animated,
+  Dimensions,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+
+interface Card {
+  month: string;
+  rank: string;
+  id: string;
+  img: string;
+  rotation: number;
+  title: { en: string; ko: string };
+  meaning: { en: string; ko: string };
+}
+
+interface Prop {
+  handleDraw: () => void;
+  setVisible: (value: boolean) => void;
+  remaining: Card[];
+  handleReset: () => void;
+  first: Card | null;
+  showLabels: Boolean;
+  setShowLabels: (value: boolean) => void;
+  boxFour: Card[];
+  setOpenResults: (value: boolean) => void;
+  setOpenInfo: (value: boolean) => void;
+  setResetOpen: (value: boolean) => void;
+}
+
+const audio = { en: "Audio", ko: "음향" };
+const helper = { en: "Helper", ko: "도우미" };
+const retry = { en: "Restart", ko: "재시작" };
+const cycle = { en: "Cycle Deck", ko: "순환" };
+const result = { en: "Open Result", ko: "결과 열기" };
+const count = { en: "In Deck", ko: "남은 패" };
+
+const Controls = ({
+  handleDraw,
+  setVisible,
+  remaining,
+  handleReset,
+  first,
+  showLabels,
+  setShowLabels,
+  boxFour,
+  setOpenResults,
+  setOpenInfo,
+  setResetOpen,
+}: Prop) => {
+  const { lang } = useLanguage();
+  const { mute, setMute } = useMute();
+  const { playClick } = useAudio();
+
+  const [fontsLoaded] = useFonts({
+    "GowunDodum-Regular": require("../assets/fonts/GowunDodum-Regular.ttf"),
+    "Gugi-Regular": require("../assets/fonts/Gugi-Regular.ttf"),
+  });
+
+  const { width: vw } = Dimensions.get("window");
+
+  const [showCycle, setShowCycle] = useState(false);
+  // const [opacity, setOpacity] = useState(1);
+
+  // useEffect(() => {
+  //   if (remaining.length === 0) return;
+  //   Animated.timing(translateY, {
+  //     toValue: 0,
+  //     duration: 1,
+  //     useNativeDriver: true,
+  //   }).start();
+  //   setOpacity(1);
+  // }, [remaining]);
+
+  useEffect(() => {
+    if (remaining.length === 0) return;
+    translateY.setValue(0);
+    animatedOpacity.setValue(1);
+  }, [remaining]);
+
+  // const translateY = useRef(new Animated.Value(0)).current;
+
+  // const handlePressIn = () => {
+  //   if (remaining.length === 0) return;
+  //   if (first !== null) return;
+
+  //   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+  //   translateY.setValue(0);
+  //   setOpacity(1);
+
+  //   Animated.timing(translateY, {
+  //     toValue: -20,
+  //     duration: 200,
+  //     useNativeDriver: true,
+  //   }).start();
+  // };
+
+  // const handlePressOut = () => {
+  //   setShowCycle(true);
+
+  //   Animated.timing(translateY, {
+  //     toValue: -120,
+  //     duration: 100,
+  //     useNativeDriver: true,
+  //   }).start(() => {
+  //     setOpacity(0);
+  //     handleDraw();
+  //     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+  //     setTimeout(() => playClick(), 100);
+  //   });
+  // };
+
+  const translateY = useRef(new Animated.Value(0)).current;
+  const animatedOpacity = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = () => {
+    if (remaining.length === 0) return;
+    if (first !== null) return;
+
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    translateY.setValue(0);
+    animatedOpacity.setValue(1);
+
+    Animated.timing(translateY, {
+      toValue: -20,
+      duration: 100,
+      useNativeDriver: true, // ✅
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    setShowCycle(true);
+
+    Animated.timing(translateY, {
+      toValue: -100,
+      duration: 50,
+      useNativeDriver: true, // ✅
+    }).start(() => {
+      Animated.timing(animatedOpacity, {
+        toValue: 0,
+        duration: 0,
+        useNativeDriver: true, // ✅
+      }).start();
+      handleDraw();
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      setTimeout(() => playClick(), 50);
+    });
+  };
+
+  const [cycleBorder, setCycleBorder] = useState(false);
+  const [sound, setSound] = useState(true);
+  const [labels, setLabels] = useState(true);
+  const [restart, setRestart] = useState(true);
+  const [touch, setTouch] = useState(true);
+
+  return (
+    <View style={styles.bottomBar}>
+      {/* Left side: Labels + Card Count */}
+      <View
+        style={{
+          flex: 2,
+          flexDirection: "row",
+          justifyContent: "center",
+          alignItems: "center",
+          height: 70,
+          paddingVertical: 5,
+        }}
+      >
+        <Pressable
+          style={{ width: "50%" }}
+          onPressIn={() => {
+            Haptics.selectionAsync();
+            setLabels(false);
+          }}
+          onPressOut={() => {
+            setLabels(true);
+            setShowLabels(!showLabels);
+          }}
+        >
+          <View style={styles.btnCol}>
+            <View style={styles.btnIconWrap}>
+              <MaterialCommunityIcons
+                name={showLabels ? "label-outline" : "label-off-outline"}
+                size={vw * 0.08}
+                color={labels ? "white" : "rgba(255,255,255,0.5)"}
+                allowFontScaling={false}
+              />
+            </View>
+            <Text
+              style={{
+                color: labels ? "white" : "rgba(255,255,255,0.5)",
+                fontSize: vw * 0.035,
+                fontFamily: "GowunDodum-Regular",
+                height: "40%",
+                width: "100%",
+                textAlign: "center",
+              }}
+              allowFontScaling={false}
+            >
+              {helper[lang]}
+            </Text>
+          </View>
+        </Pressable>
+
+        {/* Card count */}
+        <View style={{ ...styles.btnCol, width: "50%" }}>
+          <Text
+            style={{
+              color: "white",
+              fontSize: vw * 0.06,
+              fontFamily: "Gugi-Regular",
+              height: "60%",
+              textAlignVertical: "center",
+              width: "100%",
+              textAlign: "center",
+            }}
+            allowFontScaling={false}
+          >
+            {remaining.length}
+          </Text>
+          <Text
+            style={{
+              color: "white",
+              fontSize: vw * 0.035,
+              fontFamily: "GowunDodum-Regular",
+              height: "40%",
+              width: "100%",
+              textAlign: "center",
+            }}
+            allowFontScaling={false}
+          >
+            {count[lang]}
+          </Text>
+        </View>
+      </View>
+
+      {/* Center: Draw deck */}
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          borderRadius: 10,
+          overflow: "visible",
+          aspectRatio: 230 / 360,
+          // boxShadow: "inset 1px 1px 2px 1px black",
+          borderWidth: 1,
+          borderLeftWidth: 2,
+          borderTopWidth: 2,
+          backgroundColor: "rgba(122, 122, 122, 0.25)",
+        }}
+      >
+        {remaining.length !== 0 && (
+          <Pressable
+            style={styles.drawButton}
+            onPressIn={() => {
+              handlePressIn();
+              setTouch(false);
+            }}
+            onPressOut={() => {
+              handlePressOut();
+              setTouch(true);
+            }}
+          >
+            <MaterialIcons
+              name="touch-app"
+              size={36}
+              color="rgba(255, 255, 255, 0.75)"
+              style={{ padding: 4, zIndex: 50, opacity: touch ? 1 : 0.5 }}
+              allowFontScaling={false}
+            />
+            {remaining.slice(-3).map((x, i) => (
+              <Animated.View
+                key={i}
+                style={{
+                  ...styles.imageBox,
+                  width: vw * 0.15,
+                  left: "50%",
+                  top: "50%",
+                  transform: [
+                    { translateX: -(vw * 0.15) / 2 },
+                    { translateY: -(vw * 0.15 * (360 / 230)) / 2 },
+                    ...(x === remaining[remaining.length - 1]
+                      ? [{ translateY }]
+                      : []),
+                    // { rotate: `${x.rotation * 1.5}deg` },
+                  ],
+                  // opacity: x === remaining[remaining.length - 1] ? opacity : 1,
+                  // On the top card in remaining.slice(-5).map:
+                  opacity:
+                    x === remaining[remaining.length - 1]
+                      ? animatedOpacity
+                      : new Animated.Value(1),
+                }}
+              >
+                <Image
+                  source={require("../assets/cardImgs/backOG.webp")}
+                  style={styles.image}
+                  resizeMode="stretch"
+                />
+              </Animated.View>
+            ))}
+          </Pressable>
+        )}
+
+        {remaining.length === 0 && showCycle && (
+          <Pressable
+            onPressIn={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setCycleBorder(true);
+            }}
+            onPressOut={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setCycleBorder(false);
+              if (boxFour.length === 12) {
+                setOpenResults(true);
+              } else {
+                handleDraw();
+                playClick();
+              }
+            }}
+            style={{
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: "10%",
+              overflow: "hidden",
+              width: vw * 0.15,
+              aspectRatio: 230 / 360,
+              borderStyle: "dashed",
+            }}
+          >
+            <Text
+              style={{
+                color: !cycleBorder
+                  ? "rgba(255, 217, 0, 1)"
+                  : "rgba(255, 255, 255, 0.5)",
+                fontWeight: "500",
+                fontSize: lang === "en" ? vw * 0.04 : vw * 0.05,
+                textAlign: "center",
+                fontFamily: "Gugi-Regular",
+              }}
+              allowFontScaling={false}
+            >
+              {boxFour.length === 12 ? result[lang] : cycle[lang]}
+            </Text>
+          </Pressable>
+        )}
+      </View>
+
+      {/* Right side: Mute + Restart */}
+      <View
+        style={{
+          flex: 2,
+          flexDirection: "row",
+          justifyContent: "center",
+          alignItems: "center",
+          height: 70,
+          paddingVertical: 5,
+        }}
+      >
+        <Pressable
+          style={{ width: "50%" }}
+          onPressIn={() => {
+            Haptics.selectionAsync();
+            setSound(false);
+          }}
+          onPressOut={() => {
+            setSound(true);
+            setMute(!mute);
+          }}
+        >
+          <View style={styles.btnCol}>
+            <View style={styles.btnIconWrap}>
+              <Feather
+                name={mute ? "volume-x" : "volume-2"}
+                size={vw * 0.08}
+                color={sound ? "white" : "rgba(255,255,255,0.5)"}
+                allowFontScaling={false}
+              />
+            </View>
+            <Text
+              style={{
+                color: sound ? "white" : "rgba(255,255,255,0.5)",
+                fontSize: vw * 0.035,
+                fontFamily: "GowunDodum-Regular",
+                height: "40%",
+                width: "100%",
+                textAlign: "center",
+              }}
+              allowFontScaling={false}
+            >
+              {audio[lang]}
+            </Text>
+          </View>
+        </Pressable>
+
+        <Pressable
+          style={{ width: "50%" }}
+          onPressIn={() => {
+            Haptics.selectionAsync();
+            setRestart(false);
+          }}
+          onPressOut={() => {
+            setRestart(true);
+            setResetOpen(true);
+          }}
+        >
+          <View style={styles.btnCol}>
+            <View style={styles.btnIconWrap}>
+              <Entypo
+                name="cycle"
+                size={vw * 0.075}
+                color={restart ? "white" : "rgba(255,255,255,0.5)"}
+                allowFontScaling={false}
+              />
+            </View>
+            <Text
+              style={{
+                color: restart ? "white" : "rgba(255,255,255,0.5)",
+                fontSize: vw * 0.035,
+                fontFamily: "GowunDodum-Regular",
+                height: "40%",
+                width: "100%",
+                textAlign: "center",
+              }}
+              allowFontScaling={false}
+            >
+              {retry[lang]}
+            </Text>
+          </View>
+        </Pressable>
+      </View>
+    </View>
+  );
+};
+
+export default Controls;
+
+const styles = StyleSheet.create({
+  bottomBar: {
+    height: 100,
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginVertical: 15,
+  },
+  drawButton: {
+    width: "100%",
+    height: "100%",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    position: "relative",
+  },
+  imageBox: {
+    height: "auto",
+    aspectRatio: "230/360",
+    position: "absolute",
+    borderWidth: 1,
+    borderRadius: 3,
+    overflow: "hidden",
+    borderColor: "black",
+    backgroundColor: "rgba(188, 26, 8, 1)",
+    // boxShadow: "2px 2px 2px 0px black",
+    borderBottomWidth: 2,
+    borderRightWidth: 2,
+    borderLeftWidth: 1,
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+  },
+  btnCol: {
+    flexDirection: "column",
+    justifyContent: "space-between",
+    alignItems: "center",
+    height: "100%",
+    width: "100%",
+  },
+  btnIconWrap: {
+    height: "60%",
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+  },
+});
+</file>
+
+<file path="components/fourStack.tsx">
+// import { useLanguage } from "@/context/LanguageContext";
+// import {
+//   Jua_400Regular,
+//   useFonts as useJuaFonts,
+// } from "@expo-google-fonts/jua";
+// import { useAudioPlayer } from "expo-audio";
+// import * as Haptics from "expo-haptics";
+// import React, { useEffect } from "react";
+// import {
+//   Dimensions,
+//   Image,
+//   Pressable,
+//   StyleSheet,
+//   Text,
+//   View,
+// } from "react-native";
+
+// interface Card {
+//   month: string; // e.g., "Jan", "Feb", etc.
+//   rank: string;
+//   id: string; // optional, unique identifier
+//   img: string;
+//   rotation: number;
+//   title: { en: string; ko: string };
+//   meaning: { en: string; ko: string };
+// }
+
+// interface Prop {
+//   fourCards: Card[];
+//   updateFourCards: (value: Card[]) => void;
+//   imageSet: Record<string, any>;
+//   first: Card | null;
+//   setFirst: (value: Card | null) => void;
+//   second: Card | null;
+//   setSecond: (value: Card | null) => void;
+//   showLabels: Boolean;
+//   mute: Boolean;
+// }
+
+// const FourStack = ({
+//   fourCards,
+//   imageSet,
+//   first,
+//   setFirst,
+//   second,
+//   setSecond,
+//   showLabels,
+//   mute,
+// }: Prop) => {
+//   const { lang } = useLanguage();
+
+//   const [juaLoaded] = useJuaFonts({ Jua_400Regular });
+
+//   // Sounds
+//   ////////////////
+//   const plasticPlayers = [
+//     useAudioPlayer(require("../assets/plastic.mp3")),
+//     // useAudioPlayer(require("../assets/plastic.mp3")),
+//     // useAudioPlayer(require("../assets/plastic.mp3")),
+//   ];
+
+//   useEffect(() => {
+//     plasticPlayers.forEach((p) => {
+//       p.volume = 0.1;
+//     });
+//   }, []);
+
+//   const playPlastic = () => {
+//     for (let i = 0; i < plasticPlayers.length; i++) {
+//       const player = plasticPlayers[i];
+
+//       if (!player.playing) {
+//         player.seekTo(0);
+//         player.play();
+//         return;
+//       }
+//     }
+//     // all busy → drop sound (correct behavior)
+//   };
+//   //////////////////////
+
+//   const { width: vw } = Dimensions.get("window");
+
+//   const handlePress = (card: Card) => {
+//     // Haptics.selectionAsync();
+
+//     if (first === null) {
+//       setFirst(card);
+//       if (!mute) {
+//         playPlastic();
+//       }
+//       console.log("first card selected");
+//     }
+
+//     if (first !== null && card !== first && second === null) {
+//       setSecond(card);
+//       console.log("initial match");
+//     }
+
+//     if (first !== null && card === first) {
+//       setFirst(null);
+//       setSecond(null);
+
+//       console.log("same card");
+//     }
+//   };
+
+//   return (
+//     <View
+//       style={{
+//         width: "20%",
+//         display: "flex",
+//         flexDirection: "column",
+//         flexWrap: "nowrap",
+//         alignItems: "center",
+//         position: "relative",
+//       }}
+//     >
+//       {fourCards.map((x, i) => {
+//         return (
+//           <Pressable
+//             key={i}
+//             style={{
+//               ...styles.imageBox,
+//               width: vw * 0.15,
+//               top: vw * 0.15 * (360 / 230) * 0.25 * i,
+//               borderColor: first === x ? "indianred" : "indianred",
+//               borderWidth:
+//                 x === fourCards[fourCards.length - 1]
+//                   ? first === x
+//                     ? 1
+//                     : 1
+//                   : 0.5,
+//               transform:
+//                 x === fourCards[fourCards.length - 1]
+//                   ? [
+//                       // { translateX: rotateInt[i] },
+//                       { rotate: `${x.rotation}deg` },
+//                       { scale: first === x ? 1.15 : 1 },
+//                     ]
+//                   : [
+//                       // { translateX: rotateInt[i] },
+//                       { rotate: `${x.rotation * -1}deg` },
+//                     ],
+//               boxShadow:
+//                 x === fourCards[fourCards.length - 1]
+//                   ? first === x
+//                     ? "0px 0px 0px 2px rgba(255, 217, 0, 1)"
+//                     : "2px 2px 2px black"
+//                   : "1px 1px 2px black",
+//               zIndex: first === x ? 10 : 1,
+//             }}
+//             onPressIn={() =>
+//               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+//             }
+//             onPressOut={() => handlePress(x)}
+//             disabled={x === fourCards[fourCards.length - 1] ? false : true}
+//           >
+//             <Image
+//               source={
+//                 x === fourCards[fourCards.length - 1]
+//                   ? imageSet[x.img]
+//                   : require("../assets/cardImgs/backOG.webp")
+//               }
+//               style={styles.image}
+//               resizeMode="stretch"
+//             ></Image>
+//             {showLabels && (
+//               <View
+//                 style={{
+//                   position: "absolute",
+//                   right: 0,
+//                   left: 0,
+//                   bottom: 0,
+//                   margin: 1,
+//                   justifyContent: "center",
+//                   alignItems: "center",
+//                 }}
+//               >
+//                 <Text
+//                   style={{
+//                     backgroundColor: "rgba(255, 217, 0, 1)",
+//                     width: "100%",
+//                     color: "black",
+//                     textAlign: "center",
+//                     fontSize: lang === "en" ? vw * 0.03 : vw * 0.03,
+//                     fontWeight: "500",
+//                     paddingVertical: 1,
+//                     opacity: x === fourCards[fourCards.length - 1] ? 1 : 0,
+//                   }}
+//                 >
+//                   {x.title[lang]}
+//                 </Text>
+//               </View>
+//             )}
+//           </Pressable>
+//         );
+//       })}
+//     </View>
+//   );
+// };
+
+// export default FourStack;
+
+// const styles = StyleSheet.create({
+//   imageBox: {
+//     aspectRatio: "230/360",
+//     position: "absolute",
+//     borderRadius: 3,
+//     overflow: "hidden",
+//     backgroundColor: "rgba(188, 26, 8, 1)",
+//   },
+//   image: {
+//     width: "100%",
+//     height: "100%",
+//   },
+// });
+
+import { useAudio } from "@/context/AudioContext";
+import { useLanguage } from "@/context/LanguageContext";
+import {
+  Jua_400Regular,
+  useFonts as useJuaFonts,
+} from "@expo-google-fonts/jua";
+import * as Haptics from "expo-haptics";
+import {
+  Dimensions,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+
+interface Card {
+  month: string;
+  rank: string;
+  id: string;
+  img: string;
+  rotation: number;
+  title: { en: string; ko: string };
+  meaning: { en: string; ko: string };
+}
+
+interface Prop {
+  fourCards: Card[];
+  updateFourCards: (value: Card[]) => void;
+  imageSet: Record<string, any>;
+  first: Card | null;
+  setFirst: (value: Card | null) => void;
+  second: Card | null;
+  setSecond: (value: Card | null) => void;
+  showLabels: Boolean;
+}
+
+const FourStack = ({
+  fourCards,
+  imageSet,
+  first,
+  setFirst,
+  second,
+  setSecond,
+  showLabels,
+}: Prop) => {
+  const { lang } = useLanguage();
+  const { playPlastic } = useAudio();
+
+  const [juaLoaded] = useJuaFonts({ Jua_400Regular });
+
+  const { width: vw } = Dimensions.get("window");
+
+  const handlePress = (card: Card) => {
+    if (first === null) {
+      setFirst(card);
+      playPlastic();
+      console.log("first card selected");
+      return;
+    }
+
+    if (card === first) {
+      setFirst(null);
+      setSecond(null);
+      console.log("same card");
+      return;
+    }
+
+    if (second === null) {
+      setSecond(card);
+      console.log("initial match");
+    }
+  };
+
+  return (
+    <View
+      style={{
+        width: "20%",
+        flexDirection: "column",
+        alignItems: "center",
+        position: "relative",
+      }}
+    >
+      {fourCards.map((x, i) => {
+        const isTop = x === fourCards[fourCards.length - 1];
+        const isSelected = first === x;
+
+        return (
+          <Pressable
+            key={i}
+            style={{
+              ...styles.imageBox,
+              width: vw * 0.15,
+              top: vw * 0.15 * (360 / 230) * 0.25 * i,
+              borderWidth: isSelected ? 2 : 1,
+              borderBottomWidth: 2,
+              borderRightWidth: 2,
+              borderColor: isSelected
+                ? "rgba(255, 217, 0, 1)"
+                : "rgba(0,0,0,0.5)",
+              transform: isTop
+                ? [
+                    { rotate: `${x.rotation}deg` },
+                    { scale: isSelected ? 1.15 : 1 },
+                  ]
+                : [{ rotate: `${x.rotation * -1}deg` }],
+              // boxShadow: isSelected
+              //   ? "0px 0px 0px 2px rgba(255, 217, 0, 1)"
+              //   : isTop
+              //     ? "2px 2px 2px black"
+              //     : "1px 1px 2px black",
+              elevation: 0,
+              shadowColor: "#000000",
+              zIndex: isSelected ? 10 : 1,
+            }}
+            onPressIn={() =>
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+            }
+            onPressOut={() => handlePress(x)}
+            disabled={!isTop}
+          >
+            <Image
+              source={
+                isTop
+                  ? imageSet[x.img]
+                  : require("../assets/cardImgs/backOG.webp")
+              }
+              style={styles.image}
+              resizeMode="stretch"
+            />
+            {showLabels && isTop && (
+              <View style={styles.labelWrap}>
+                <Text
+                  style={{
+                    backgroundColor: "rgba(255, 217, 0, 1)",
+                    width: "100%",
+                    color: "black",
+                    textAlign: "center",
+                    fontSize: vw * 0.03,
+                    fontWeight: "500",
+                    paddingVertical: 1,
+                  }}
+                  allowFontScaling={false}
+                >
+                  {x.title[lang]}
+                </Text>
+              </View>
+            )}
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+};
+
+export default FourStack;
+
+const styles = StyleSheet.create({
+  imageBox: {
+    aspectRatio: "230/360",
+    position: "absolute",
+    borderRadius: 3,
+    overflow: "hidden",
+    backgroundColor: "rgba(188, 26, 8, 1)",
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+  },
+  labelWrap: {
+    position: "absolute",
+    right: 0,
+    left: 0,
+    bottom: 0,
+    margin: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});
+</file>
+
+<file path="components/resultsOverlay.tsx">
+import { useLanguage } from "@/context/LanguageContext";
+import { useFonts } from "expo-font";
+import * as Haptics from "expo-haptics";
+import { useEffect, useState } from "react";
+import {
+  Animated,
+  Dimensions,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+
+interface Card {
+  month: string; // e.g., "Jan", "Feb", etc.
+  rank: string;
+  id: string; // optional, unique identifier
+  img: string;
+  rotation: number;
+  title: { en: string; ko: string };
+  meaning: { en: string; ko: string };
+}
+
+type Props = {
+  setOpenResults: (value: boolean) => void;
+  boxOne: Card[];
+  boxTwo: Card[];
+  boxThree: Card[];
+  boxFour: Card[];
+  imageSet: Record<string, any>;
+  setResults: (value: Card[][]) => void;
+};
+
+const close = { en: "Close", ko: "닫기" };
+
+const result = { en: "Reading", ko: "운세" };
+
+const months: String[] = [
+  "jan",
+  "feb",
+  "mar",
+  "apr",
+  "may",
+  "jun",
+  "jul",
+  "aug",
+  "sep",
+  "oct",
+  "nov",
+  "dec",
+];
+
+const ranks = ["A", "B", "C", "D"];
+
+const ResultsOverlay = ({
+  setOpenResults,
+  boxOne,
+  boxTwo,
+  boxThree,
+  boxFour,
+  imageSet,
+  setResults,
+}: Props) => {
+  const { width: vw, height: vh } = Dimensions.get("window");
+
+  const { lang } = useLanguage();
+
+  const [fontsLoaded] = useFonts({
+    // Point directly to your local asset
+    "GowunDodum-Regular": require("../assets/fonts/GowunDodum-Regular.ttf"),
+    "Gugi-Regular": require("../assets/fonts/Gugi-Regular.ttf"),
+  });
+
+  const [translateClose, setTranslateClose] = useState(0);
+  const [opacity] = useState(new Animated.Value(0));
+
+  useEffect(() => {
+    Animated.timing(opacity, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
+  const handleClose = () => {
+    Animated.timing(opacity, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => setOpenResults(false));
+  };
+
+  const [boxes] = useState([boxOne, boxTwo, boxThree, boxFour]);
+
+  const [matches, setMatches] = useState<Card[][]>([]);
+
+  useEffect(() => {
+    if (boxFour.length === 12) {
+      const matched: Card[] = [];
+
+      boxes.map((x, i) => {
+        boxes[i].map((card) => {
+          const monthCounts = boxes[i].reduce(
+            (acc, card) => {
+              acc[card.month] = (acc[card.month] || 0) + 1;
+              return acc;
+            },
+            {} as Record<string, number>,
+          );
+
+          if (monthCounts[card.month] === 4) {
+            matched.push(card);
+          }
+        });
+      });
+
+      const orderedRanks = matched.sort(
+        (a, b) => ranks.indexOf(a.rank) - ranks.indexOf(b.rank),
+      );
+
+      const orderedMonths = orderedRanks.sort(
+        (a, b) => months.indexOf(a.month) - months.indexOf(b.month),
+      );
+
+      const result: Card[][] = [];
+
+      let currentGroup = [orderedMonths[0]];
+
+      for (let i = 1; i < orderedMonths.length; i++) {
+        if (orderedMonths[i].month === orderedMonths[i - 1].month) {
+          currentGroup.push(orderedMonths[i]);
+        } else {
+          result.push(currentGroup);
+          currentGroup = [orderedMonths[i]];
+        }
+      }
+      result.push(currentGroup);
+
+      setMatches(result);
+      setResults(result);
+    }
+  }, [boxFour]);
+
+  return (
+    <Animated.View
+      style={{
+        position: "absolute",
+        width: "100%",
+        height: "100%",
+        zIndex: 20,
+        backgroundColor: "rgba(255, 255, 255, 0.3)",
+        opacity,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <View
+        style={{
+          backgroundColor: "rgba(235, 235, 235, 0.8)",
+          borderRadius: 15,
+          overflow: "hidden",
+          padding: 10,
+          width: "90%",
+          height: "70%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 10,
+          // boxShadow: "inset 1px 2px 3px 3px white, 1px 3px 3px 2px black",
+        }}
+      >
+        <View
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            borderRadius: 10,
+            overflow: "hidden",
+            width: "100%",
+            height: vh * 0.05,
+            backgroundColor: "rgb(42, 83, 60)",
+          }}
+        >
+          <Text
+            style={{
+              fontSize: vw * 0.06,
+              fontFamily: "Gugi-Regular",
+              color: "rgba(255, 217, 0, 1)",
+              width: "100%",
+              textAlign: "center",
+            }}
+            allowFontScaling={false}
+          >
+            {new Date().toLocaleDateString()} {result[lang]}
+          </Text>
+        </View>
+        <View
+          style={{
+            width: "100%",
+            height: "80%",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-evenly",
+            alignContent: "center",
+            gap: 0,
+          }}
+        >
+          {/* <View
+            style={{
+              height: "45%",
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            {boxes.map((x, i) => (
+              <View
+                key={i}
+                style={{
+                  width: "100%",
+                  height: "22%",
+                  flexDirection: "row",
+                  flexWrap: "nowrap",
+                  justifyContent: "space-around",
+                  alignItems: "center",
+                  gap: 1,
+                  backgroundColor: "rgba(235, 235, 235, 0.8)",
+                  boxShadow: "inset 1px 1px 4px black",
+                  padding: 5,
+                  borderRadius: 10,
+                }}
+              >
+                {boxes[i].map((card, index) => {
+                  const monthCounts = boxes[i].reduce((acc, card) => {
+                    acc[card.month] = (acc[card.month] || 0) + 1;
+                    return acc;
+                  }, {} as Record<string, number>);
+
+                  const hasFour = monthCounts[card.month] === 4;
+
+                  return (
+                    <View
+                      key={index}
+                      style={{
+                        width: "6%",
+                        aspectRatio: 230 / 360,
+                        borderRadius: 1,
+                        // transform: [{ rotate: `${card.rotation}deg` }],
+                        borderColor: "indianred",
+                        borderWidth: 1,
+                        boxShadow: hasFour
+                          ? "0px 0px 0px 3px rgba(56, 129, 50, 1)"
+                          : "1px 1px 1px black",
+                      }}
+                    >
+                      <Image
+                        key={card.id}
+                        source={imageSet[card.img]}
+                        style={{ width: "100%", height: "100%" }}
+                        resizeMode="stretch"
+                      />
+                    </View>
+                  );
+                })}
+              </View>
+            ))}
+          </View> */}
+          <View
+            style={{
+              height: "100%",
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <ScrollView
+              style={{
+                width: "100%",
+                height: "100%",
+                borderRadius: 10,
+                overflow: "hidden",
+                borderColor: "black",
+                padding: 10,
+                // boxShadow: "inset 1px 1px 4px black",
+                backgroundColor: "rgba(235, 235, 235, 0.8)",
+              }}
+              contentContainerStyle={{
+                display: "flex",
+                flexDirection: "column",
+                flexWrap: "nowrap",
+                gap: 5,
+                paddingBottom: 10,
+              }}
+            >
+              {matches.map((x, i) => (
+                <View
+                  key={i}
+                  style={{
+                    height: 80,
+                    display: "flex",
+                    flexDirection: "row",
+                    flexWrap: "wrap",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    borderTopWidth: 1,
+                    paddingTop: 5,
+                    borderStyle: "dashed",
+                  }}
+                >
+                  <View style={{ width: "40%" }}>
+                    {matches[i].map((card, index) => (
+                      <View
+                        key={index}
+                        style={{
+                          width: 40,
+                          height: "auto",
+                          aspectRatio: "230/360",
+                          borderWidth: 1,
+                          borderRadius: 3,
+                          overflow: "hidden",
+                          borderColor: "black",
+                          position: "absolute",
+                          transform: [
+                            { translateX: index * 25 },
+                            { rotate: `${card.rotation}deg` },
+                          ],
+                          zIndex: 4 - index,
+                          // boxShadow: "3px 3px 4px black",
+                        }}
+                      >
+                        <Image
+                          key={card.id}
+                          source={imageSet[card.img]}
+                          style={{ width: "100%", height: "100%" }}
+                          resizeMode="stretch"
+                        />
+                      </View>
+                    ))}
+                  </View>
+                  <View
+                    style={{
+                      width: "60%",
+                      height: 80,
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "flex-start",
+                      justifyContent: "flex-start",
+                      gap: 0,
+                    }}
+                  >
+                    <View
+                      style={{
+                        width: "100%",
+                        display: "flex",
+                        flexDirection: lang === "en" ? "row" : "row-reverse",
+                        justifyContent: "space-between",
+                        alignItems: "flex-end",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: vw * 0.035,
+                          fontWeight: "bold",
+                          fontFamily: "GowunDodum-Regular",
+                          textAlign: "right",
+                        }}
+                        allowFontScaling={false}
+                      >
+                        {matches[i][1].title.en}
+                      </Text>
+                      <Text
+                        style={{
+                          fontSize: vw * 0.035,
+                          fontWeight: "bold",
+                          fontFamily: "GowunDodum-Regular",
+                        }}
+                        allowFontScaling={false}
+                      >
+                        {matches[i][1].title.ko}
+                      </Text>
+                    </View>
+                    <View
+                      style={{
+                        width: "100%",
+                        height: 2,
+                        backgroundColor: "black",
+                        marginVertical: 2,
+                      }}
+                    ></View>
+                    <Text
+                      style={{
+                        fontSize: vw * 0.035,
+                        paddingTop: 2,
+                        fontFamily: "GowunDodum-Regular",
+                      }}
+                      allowFontScaling={false}
+                    >
+                      {matches[i][1].meaning[lang]}
+                    </Text>
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+        <View
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            height: vh * 0.05,
+          }}
+        >
+          <Pressable
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              width: "100%",
+            }}
+            onPress={() => handleClose()}
+            onPressIn={() => {
+              Haptics.selectionAsync();
+              setTranslateClose(2);
+            }}
+            onPressOut={() => setTranslateClose(0)}
+          >
+            <Animated.View
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor:
+                  translateClose === 2 ? "rgb(255, 80, 80)" : "rgb(219, 0, 0)",
+                paddingVertical: 0,
+                height: "100%",
+                width: "100%",
+                borderRadius: 10,
+                overflow: "hidden",
+                // boxShadow: "inset 2px 2px 2px white, 2px 2px 2px 1px black",
+                borderWidth: 3,
+                borderColor: "rgba(255, 190, 190, 0)",
+                transform: [{ translateY: translateClose }],
+              }}
+            >
+              <Text
+                style={{
+                  color: "white",
+                  fontWeight: "500",
+                  fontSize: vw * 0.05,
+                }}
+                allowFontScaling={false}
+              >
+                {close[lang]}
+              </Text>
+            </Animated.View>
+          </Pressable>
+        </View>
+      </View>
+    </Animated.View>
+  );
+};
+
+export default ResultsOverlay;
+
+const styles = StyleSheet.create({});
+</file>
+
+<file path="components/header.tsx">
+import { useLanguage } from "@/context/LanguageContext";
+import Feather from "@expo/vector-icons/Feather";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { useFonts } from "expo-font";
+import * as Haptics from "expo-haptics";
+import { useState } from "react";
+import { Dimensions, Pressable, StyleSheet, Text, View } from "react-native";
+
+interface Prop {
+  setOpenInfo: (value: boolean) => void;
+}
+
+const language = { en: "ENG", ko: "한국어" };
+const information = { en: "Info", ko: "정보" };
+
+const Header = ({ setOpenInfo }: Prop) => {
+  const { width: vw } = Dimensions.get("window");
+
+  const { lang, setLang } = useLanguage();
+  const toggleLang = () => setLang(lang === "en" ? "ko" : "en");
+
+  const [fontsLoaded] = useFonts({
+    // Point directly to your local asset
+    "GowunDodum-Regular": require("../assets/fonts/GowunDodum-Regular.ttf"),
+    "Gugi-Regular": require("../assets/fonts/Gugi-Regular.ttf"),
+  });
+
+  const date = new Date().toLocaleDateString();
+  const dayNum = new Date().getDay();
+  const days = [
+    { en: "Sun", ko: "일요일" },
+    { en: "Mon", ko: "월요일" },
+    { en: "Tue", ko: "화요일" },
+    { en: "Wed", ko: "수요일" },
+    { en: "Thu", ko: "목요일" },
+    { en: "Fri", ko: "금요일" },
+    { en: "Sat", ko: "토요일" },
+  ];
+
+  const [english, setEnglish] = useState(true);
+  const [info, setInfo] = useState(true);
+
+  return (
+    <View style={styles.header}>
+      <View
+        style={{
+          height: "100%",
+          display: "flex",
+          flex: 1,
+          justifyContent: "center",
+        }}
+      >
+        <Pressable
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            alignSelf: "flex-start",
+            height: "100%",
+            width: 50,
+            gap: 4,
+          }}
+          onPressIn={() => {
+            Haptics.selectionAsync();
+            setEnglish(false);
+          }}
+          onPressOut={() => {
+            setEnglish(true);
+            toggleLang();
+          }}
+        >
+          <Ionicons
+            name="globe-outline"
+            size={vw * 0.07}
+            color={english ? "white" : "rgba(255,255,255,0.5)"}
+            allowFontScaling={false}
+          />
+          <Text
+            style={{
+              color: english ? "white" : "rgba(255,255,255,0.5)",
+              fontSize: vw * 0.035,
+              fontFamily: "GowunDodum-Regular",
+              width: "100%",
+              textAlign: "center",
+            }}
+            allowFontScaling={false}
+          >
+            {language[lang]}
+          </Text>
+        </Pressable>
+      </View>
+      <View
+        style={{
+          display: "flex",
+          flex: 3,
+          flexDirection: "row",
+          flexWrap: "nowrap",
+          alignItems: "center",
+          height: "100%",
+          justifyContent: "space-evenly",
+        }}
+      >
+        <Text
+          style={{
+            fontSize: vw * 0.06,
+            height: "100%",
+            color: "rgb(255, 217, 0)",
+            fontFamily: "Gugi-Regular",
+            textAlign: "center",
+            textAlignVertical: "center",
+            flexShrink: 0,
+            includeFontPadding: false,
+            minWidth: vw * 0.12,
+          }}
+          allowFontScaling={false}
+          numberOfLines={1}
+        >
+          {days[dayNum][lang]}
+        </Text>
+        <Text
+          style={{
+            fontSize: vw * 0.06,
+            height: "100%",
+            color: "rgb(255, 217, 0)",
+            fontFamily: "Gugi-Regular",
+            textAlign: "center",
+            textAlignVertical: "center",
+          }}
+          allowFontScaling={false}
+          numberOfLines={1}
+        >
+          {date}
+        </Text>
+      </View>
+      <View
+        style={{
+          height: "100%",
+          display: "flex",
+          flex: 1,
+          justifyContent: "center",
+        }}
+      >
+        <Pressable
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            alignSelf: "flex-end",
+            height: "100%",
+            width: 50,
+            gap: 4,
+          }}
+          onPressIn={() => {
+            Haptics.selectionAsync();
+            setInfo(false);
+          }}
+          onPressOut={() => {
+            setInfo(true);
+            setOpenInfo(true);
+          }}
+        >
+          <Feather
+            name="info"
+            size={vw * 0.07}
+            color={info ? "white" : "rgba(255,255,255,0.5)"}
+            allowFontScaling={false}
+          />
+          <Text
+            style={{
+              color: info ? "white" : "rgba(255,255,255,0.5)",
+              fontSize: vw * 0.035,
+              fontFamily: "GowunDodum-Regular",
+              width: "100%",
+              textAlign: "center",
+            }}
+            allowFontScaling={false}
+          >
+            {information[lang]}
+          </Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+};
+
+export default Header;
+
+const styles = StyleSheet.create({
+  header: {
+    width: "100%",
+    height: "7%",
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+});
+</file>
+
 <file path="components/infoOverlay.tsx">
 // import { useLanguage } from "@/context/LanguageContext";
 // import Ionicons from "@expo/vector-icons/Ionicons";
@@ -6606,7 +6570,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useFonts } from "expo-font";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image"; // Optimized for performance
-import React, { memo, useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import {
   Animated,
   Dimensions,
@@ -6715,15 +6679,15 @@ const CardRow = memo(
               { flexDirection: lang === "en" ? "row" : "row-reverse" },
             ]}
           >
-            <Text style={styles.boldText} allowFontScaling={true}>
+            <Text style={styles.boldText} allowFontScaling={false}>
               {group[0].title.en}
             </Text>
-            <Text style={styles.boldText} allowFontScaling={true}>
+            <Text style={styles.boldText} allowFontScaling={false}>
               {group[0].title.ko}
             </Text>
           </View>
           <View style={styles.divider} />
-          <Text style={styles.meaningText} allowFontScaling={true}>
+          <Text style={styles.meaningText} allowFontScaling={false}>
             {group[0].meaning[lang]}
           </Text>
         </View>
@@ -6796,7 +6760,11 @@ const InfoOverlay = ({ setOpenInfo, deck, imageSet }: Props) => {
           contentContainerStyle={styles.instructionContent}
         >
           {Object.values(instructions[lang]).map((text, idx) => (
-            <Text key={idx} style={styles.instructionText}>
+            <Text
+              key={idx}
+              style={styles.instructionText}
+              allowFontScaling={false}
+            >
               {text}
             </Text>
           ))}
@@ -6917,17 +6885,17 @@ const styles = StyleSheet.create({
   },
   instructionContent: {
     gap: 10,
-    paddingBottom: 20,
+    paddingBottom: 50,
   },
   instructionText: {
-    fontSize: vw * 0.035,
+    fontSize: vw * 0.04,
     fontFamily: "GowunDodum-Regular",
   },
   cardListScroll: {
     height: "50%",
     backgroundColor: "rgba(235, 235, 235, 0.8)",
     borderRadius: 10,
-    padding: 15,
+    padding: 10,
     // boxShadow: "inset 1px 1px 4px black",
   },
   cardListContent: {
@@ -6939,6 +6907,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
+    borderTopColor: "black",
+    borderTopWidth: 1,
+    borderStyle: "dashed",
+    paddingTop: 5,
   },
   cardStackContainer: {
     width: "40%",
@@ -6975,12 +6947,12 @@ const styles = StyleSheet.create({
   },
   divider: {
     width: "100%",
-    height: 1,
+    height: 2,
     backgroundColor: "black",
     marginVertical: 2,
   },
   meaningText: {
-    fontSize: vw * 0.032,
+    fontSize: vw * 0.035,
     fontFamily: "GowunDodum-Regular",
     paddingTop: 2,
   },
@@ -7461,7 +7433,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useFonts } from "expo-font";
 import * as Haptics from "expo-haptics";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   Image,
@@ -7702,6 +7674,7 @@ const PlayArea = ({
                 fontWeight: "500",
                 paddingVertical: 1,
               }}
+              allowFontScaling={false}
             >
               {x.title[lang]}
             </Text>
@@ -7778,6 +7751,60 @@ const styles = StyleSheet.create({
 });
 </file>
 
+<file path="package.json">
+{
+  "name": "hwatu-tarot-v2",
+  "main": "expo-router/entry",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "expo start",
+    "reset-project": "node ./scripts/reset-project.js",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "lint": "expo lint"
+  },
+  "dependencies": {
+    "@expo-google-fonts/jua": "^0.4.1",
+    "@expo/vector-icons": "^15.0.3",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "expo": "^56.0.3",
+    "expo-asset": "^56.0.13",
+    "expo-audio": "~56.0.9",
+    "expo-constants": "~56.0.14",
+    "expo-font": "~56.0.5",
+    "expo-haptics": "~56.0.3",
+    "expo-image": "~56.0.8",
+    "expo-linking": "~56.0.11",
+    "expo-router": "~56.2.5",
+    "expo-splash-screen": "~56.0.9",
+    "expo-status-bar": "~56.0.4",
+    "expo-symbols": "~56.0.5",
+    "expo-system-ui": "~56.0.5",
+    "expo-web-browser": "~56.0.5",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.85.3",
+    "react-native-gesture-handler": "~2.31.1",
+    "react-native-reanimated": "4.3.1",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "4.25.1",
+    "react-native-shadow-2": "^7.1.2",
+    "react-native-svg": "15.15.4",
+    "react-native-web": "~0.21.0",
+    "react-native-worklets": "^0.8.0",
+    "react-native-worklets-core": "^1.6.3"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.14",
+    "eslint": "^9.25.0",
+    "eslint-config-expo": "~56.0.4",
+    "typescript": "~6.0.3"
+  },
+  "private": true
+}
+</file>
+
 <file path="app.json">
 {
   "expo": {
@@ -7788,14 +7815,12 @@ const styles = StyleSheet.create({
     "icon": "./assets/icon2.png",
     "scheme": "hwatutarotv2",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "icon": "./assets/icon2.png",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icon1.png",
         "backgroundColor": "#1b3320"
       },
       "predictiveBackGestureEnabled": false,
@@ -7814,7 +7839,7 @@ const styles = StyleSheet.create({
       [
         "expo-splash-screen",
         {
-          "image": "./assets/icon1.png",
+          "image": "./assets/splash.png",
           "backgroundColor": "#1b3320",
           "dark": {
             "backgroundColor": "#1b3320"
@@ -7835,63 +7860,6 @@ const styles = StyleSheet.create({
       }
     }
   }
-}
-</file>
-
-<file path="package.json">
-{
-  "name": "hwatu-tarot-v2",
-  "main": "expo-router/entry",
-  "version": "1.0.0",
-  "scripts": {
-    "start": "expo start",
-    "reset-project": "node ./scripts/reset-project.js",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
-    "web": "expo start --web",
-    "lint": "expo lint"
-  },
-  "dependencies": {
-    "@expo-google-fonts/jua": "^0.4.1",
-    "@expo/vector-icons": "^15.0.3",
-    "@react-native-async-storage/async-storage": "2.2.0",
-    "@react-navigation/bottom-tabs": "^7.4.0",
-    "@react-navigation/elements": "^2.6.3",
-    "@react-navigation/native": "^7.1.8",
-    "expo": "~54.0.33",
-    "expo-asset": "^56.0.13",
-    "expo-audio": "~1.1.1",
-    "expo-constants": "~18.0.13",
-    "expo-font": "~14.0.11",
-    "expo-haptics": "~15.0.8",
-    "expo-image": "~3.0.11",
-    "expo-linking": "~8.0.11",
-    "expo-router": "~6.0.23",
-    "expo-splash-screen": "~31.0.13",
-    "expo-status-bar": "~3.0.9",
-    "expo-symbols": "~1.0.8",
-    "expo-system-ui": "~6.0.9",
-    "expo-web-browser": "~15.0.10",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "react-native": "0.81.5",
-    "react-native-gesture-handler": "~2.28.0",
-    "react-native-reanimated": "~4.1.1",
-    "react-native-safe-area-context": "~5.6.0",
-    "react-native-screens": "~4.16.0",
-    "react-native-shadow-2": "^7.1.2",
-    "react-native-svg": "15.12.1",
-    "react-native-web": "~0.21.0",
-    "react-native-worklets": "^0.8.0",
-    "react-native-worklets-core": "^1.6.3"
-  },
-  "devDependencies": {
-    "@types/react": "~19.1.0",
-    "eslint": "^9.25.0",
-    "eslint-config-expo": "~10.0.0",
-    "typescript": "~5.9.2"
-  },
-  "private": true
 }
 </file>
 

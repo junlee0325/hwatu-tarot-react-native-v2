@@ -40,10 +40,10 @@ export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     smack1.volume = 0.6;
     smack2.volume = 0.6;
-    plastic1.volume = 0.1;
-    plastic2.volume = 0.1;
-    click1.volume = 0.5;
-    click2.volume = 0.5;
+    plastic1.volume = 0.3;
+    plastic2.volume = 0.3;
+    click1.volume = 0.7;
+    click2.volume = 0.7;
 
     [smack1, smack2, plastic1, plastic2, click1, click2].forEach((p) =>
       p.seekTo(0),

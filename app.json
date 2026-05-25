@@ -13,7 +13,6 @@
     "android": {
       "icon": "./assets/icon2.png",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icon1.png",
         "backgroundColor": "#1b3320"
       },
       "predictiveBackGestureEnabled": false,
@@ -32,11 +31,12 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/icon1.png",
+          "image": "./assets/splash.png",
           "backgroundColor": "#1b3320",
           "dark": {
             "backgroundColor": "#1b3320"
-          }
+          },
+          "resizeMode":"cover"
         }
       ],
       "expo-audio",

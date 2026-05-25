@@ -35,8 +35,7 @@
           "backgroundColor": "#1b3320",
           "dark": {
             "backgroundColor": "#1b3320"
-          },
-          "resizeMode":"cover"
+          }
         }
       ],
       "expo-audio",

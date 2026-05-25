@@ -94,100 +94,44 @@ const Header = ({ setOpenInfo }: Prop) => {
         style={{
           display: "flex",
           flex: 3,
-          flexDirection: "column",
+          flexDirection: "row",
           flexWrap: "nowrap",
           alignItems: "center",
           height: "100%",
-          justifyContent: "center",
-          gap: 0,
+          justifyContent: "space-evenly",
         }}
       >
-        {/* <View
+        <Text
           style={{
-            display: "flex",
-            flexDirection: "column",
-            flexWrap: "nowrap",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 1,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: vw * 0.04,
-              color: "rgba(255, 255, 255, 1)",
-              fontFamily: "GowunDodum-Regular",
-            }}
-            allowFontScaling={false}
-          >
-            {lang === "en" ? "화투점" : "Hwatu Tarot"}
-          </Text>
-          <Text
-            style={{
-              fontSize: vw * 0.07,
-              color: "rgba(255, 217, 0, 1)",
-              fontFamily: "GowunDodum-Regular",
-            }}
-            allowFontScaling={false}
-          >
-            {lang === "en" ? "Hwatu Tarot" : "화투점"}
-          </Text>
-        </View> */}
-        <View
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            flexWrap: "nowrap",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "100%",
+            fontSize: vw * 0.06,
             height: "100%",
+            color: "rgb(255, 217, 0)",
+            fontFamily: "Gugi-Regular",
+            textAlign: "center",
+            textAlignVertical: "center",
+            flexShrink: 0,
+            includeFontPadding: false,
+            minWidth: vw * 0.12,
           }}
+          allowFontScaling={false}
+          numberOfLines={1}
         >
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              flexWrap: "nowrap",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "100%",
-              height: "100%",
-              gap: 10,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: vw * 0.05,
-                height: "100%",
-                color: "rgb(255, 217, 0)",
-                fontFamily: "Gugi-Regular",
-                textAlign: "center",
-                textAlignVertical: "center",
-                flexShrink: 0,
-                includeFontPadding: false,
-                minWidth: vw * 0.12,
-              }}
-              allowFontScaling={false}
-              numberOfLines={1}
-            >
-              {days[dayNum][lang]}
-            </Text>
-            <Text
-              style={{
-                fontSize: vw * 0.05,
-                height: "100%",
-                color: "rgb(255, 217, 0)",
-                fontFamily: "Gugi-Regular",
-                textAlign: "center",
-                textAlignVertical: "center",
-              }}
-              allowFontScaling={false}
-            >
-              {date}
-            </Text>
-          </View>
-        </View>
+          {days[dayNum][lang]}
+        </Text>
+        <Text
+          style={{
+            fontSize: vw * 0.06,
+            height: "100%",
+            color: "rgb(255, 217, 0)",
+            fontFamily: "Gugi-Regular",
+            textAlign: "center",
+            textAlignVertical: "center",
+          }}
+          allowFontScaling={false}
+          numberOfLines={1}
+        >
+          {date}
+        </Text>
       </View>
       <View
         style={{

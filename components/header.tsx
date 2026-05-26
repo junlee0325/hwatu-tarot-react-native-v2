@@ -104,7 +104,7 @@ const Header = ({ setOpenInfo }: Prop) => {
       >
         <Text
           style={{
-            width: "50%",
+            width: "100%",
             fontSize: vw * 0.06,
             height: "100%",
             color: "rgb(255, 217, 0)",
@@ -116,9 +116,9 @@ const Header = ({ setOpenInfo }: Prop) => {
           allowFontScaling={false}
           numberOfLines={1}
         >
-          {days[dayNum][lang]}
+          {days[dayNum][lang]} {date}
         </Text>
-        <Text
+        {/* <Text
           style={{
             width: "50%",
             fontSize: vw * 0.06,
@@ -133,7 +133,7 @@ const Header = ({ setOpenInfo }: Prop) => {
           numberOfLines={1}
         >
           {date}
-        </Text>
+        </Text> */}
       </View>
       <View
         style={{

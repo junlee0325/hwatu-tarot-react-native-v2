@@ -62,14 +62,14 @@ export default function RootLayout() {
       // 3. Fade out our custom massive image overlay
       Animated.timing(fadeAnim, {
         toValue: 0,
-        duration: 800, // 800ms smooth fade out
+        duration: 300, // 800ms smooth fade out
         useNativeDriver: true,
       }).start();
     }
   }, [appIsReady, fadeAnim]);
 
   return (
-    <SafeAreaProvider style={{ flex: 1, backgroundColor: "#1b3320" }}>
+    <SafeAreaProvider style={{ flex: 1, backgroundColor: "#000000" }}>
       <LanguageProvider>
         <MuteProvider>
           <AudioProvider>
@@ -87,15 +87,15 @@ export default function RootLayout() {
                   StyleSheet.absoluteFill,
                   {
                     opacity: fadeAnim,
-                    backgroundColor: "#1b3320", // Matches your app.json background
+                    backgroundColor: "#000000", // Matches your app.json background
                     zIndex: 999, // Keeps it on top of the Stack
                   },
                 ]}
               >
                 <Image
-                  source={require("../assets/splash.jpg")} // Assuming your poster is here
+                  source={require("../assets/splash.png")} // Assuming your poster is here
                   style={{ width: "100%", height: "100%" }}
-                  resizeMode="contain"
+                  resizeMode="cover"
                 />
               </Animated.View>
             </View>

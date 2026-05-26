@@ -87,11 +87,11 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/favicon.png", 
+          "image": "./assets/blackdot.png", 
           "resizeMode": "contain",
-          "backgroundColor": "#1b3320",
+          "backgroundColor": "#000000",
           "dark": {
-            "backgroundColor": "#1b3320"
+            "backgroundColor": "#000000"
           }
         }
       ],

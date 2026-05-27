@@ -109,7 +109,7 @@ const Header = ({ setOpenInfo }: Prop) => {
             height: "100%",
             color: "rgb(255, 217, 0)",
             fontFamily: "Gugi-Regular",
-            textAlign: "right",
+            textAlign: "center",
             textAlignVertical: "center",
             includeFontPadding: false,
           }}

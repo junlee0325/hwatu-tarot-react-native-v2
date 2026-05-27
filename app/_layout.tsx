@@ -62,7 +62,7 @@ export default function RootLayout() {
       // 3. Fade out our custom massive image overlay
       Animated.timing(fadeAnim, {
         toValue: 0,
-        duration: 300, // 800ms smooth fade out
+        duration: 800, // 800ms smooth fade out
         useNativeDriver: true,
       }).start();
     }
